@@ -14,7 +14,7 @@ const Navbar:React.FC = () =>{
     return(
         <div className="fixed bottom-0 flex flex-row justify-around text-[#B09331] items-center bg-[#1C1C20] rounded-t-xl w-full h-[3rem]">
             {icon.map((data, index)=>(
-                <div key={index} className={`${menu === data?.id && "text-[#F0C633] scale-105"  }`} onClick={()=>{setMenu(data.id), navigate(`${data.id}`)}} >
+                <div key={index} className={`${menu === data?.id && "text-[#F0C633] scale-105"  }`} onClick={()=>{setMenu(data.id), navigate(`/admin/${data.id}`)}} >
                     {data.icon}
                 </div>
             ))}
