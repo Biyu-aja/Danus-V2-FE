@@ -2,10 +2,12 @@ import { createBrowserRouter, Route } from "react-router-dom";
 import Auth from "../pages/General/Auth";
 import Dashboard from "../pages/Admin/dashboard";
 import KelolaKeuangan from "../pages/Admin/kelolakeuangan";
+import KelolaUser from "../pages/Admin/kelola-user";
+import KelolaBarang from "../pages/Admin/kelola-barang";
 
 const Routes = createBrowserRouter([
     {
-        path : "/login",
+        path : "/",
         element  : <Auth />
     },
     {
@@ -22,11 +24,11 @@ const Routes = createBrowserRouter([
     },
     {
         path: "/admin/kelola-barang",
-        element : <Auth />
+        element : <KelolaBarang />
     },
     {
         path: "/admin/kelola-user",
-        element : <Auth />
+        element : <KelolaUser />
     }
 ])
 

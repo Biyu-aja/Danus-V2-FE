@@ -14,11 +14,9 @@ const CardTransaksi:React.FC<props> = ({id, id_setoran, title, tipe, nominal, ke
     const nama = "Oguri Cap"
     const kepada = "Biyu"
     return(
-        <div className="bg-[#1e1e1e] flex flex-col p-2 rounded-xl">
-            <span className="flex flex-row justify-between"><p>{id_setoran ? `Setoran: ${nama}`: `${title}`}</p><p>{created_at}</p></span>
-            {id_setoran && <p>{`Kepada: ${kepada}`}</p>}
-            <p>{`Keterangan: ${keterangan ? keterangan : "-"}`}</p>
-            <p>{`Nominal: Rp. ${nominal}`}</p>
+        <div className="bg-[#1e1e1e] flex flex-col p-3 rounded-xl hover:scale-[102%] transition-all hover:bg-white/10">
+            <span className="flex flex-row justify-between font-bold"><p>{id_setoran ? `Setoran Danus ${nama}`: `${title}`}</p><p className="font-medium">{created_at}</p></span>
+            <p className="text-[#B09331] font-semibold">{`Rp.${nominal}`}</p>
         </div>
     )
 }

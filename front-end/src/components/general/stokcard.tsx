@@ -11,7 +11,7 @@ interface props{
 
 const StokCard:React.FC<props> = ({nama_item, harga_item, jumlah_ambil, stok_tersisa, jumlah_setor}) => {
     return(
-        <div className="relative w-[10rem] h-[10rem] rounded-xl hover:scale-[105%] cursor-pointer transition-all">
+        <div className="relative min-w-[10rem] max-w-[10rem] h-[10rem] rounded-xl hover:scale-[105%] cursor-pointer transition-all">
             <img src="/image/pfp.jpg" className="object-cover rounded-xl w-[10rem] h-[10rem]" />
             <div className="absolute bottom-0 w-full">
                 <p className="font-extrabold ml-2 text-stroke">{nama_item}</p>
