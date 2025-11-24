@@ -5,7 +5,7 @@ import { BoxIcon } from "lucide-react";
 interface props{
     id?: any,
     nama?: string,
-    status?: "sudah-ambil" | "sudah-setor" | "belum-ambil",
+    status?: any,
     jumlah_ambil?: number
 }
 

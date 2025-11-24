@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "../../../components/general/header";
 import Navbar from "../../../components/admin/general-admin/navbar";
 import SearchBar from "../../../components/general/searchbar";
 import CardUser from "../../../components/admin/kelola-user/carduser";
+import DetailUser from "../../../components/admin/kelola-user/detailuser";
 
 const KelolaUser:React.FC = () => {
     const dropdown = ([
@@ -12,6 +13,20 @@ const KelolaUser:React.FC = () => {
         {value: "sudah-ambil", Menu: "Sudah Ambil"},
         {value: "belum-ambil", Menu: "Belum Ambil"},
     ])
+
+    const data = ([
+        {id: 1, nama: "Oguri Cap", status: "belum-ambil", jumlah_ambil:1023, catatan: "This guy eat to much bruh"},
+        {id: 2, nama: "Tokai Teio", status: "sudah-ambil", jumlah_ambil:512, catatan: "Fast learner and very active user."},
+        {id: 3, nama: "Mejiro McQueen", status: "sudah-setor", jumlah_ambil:256, catatan: "Reliable user with consistent activity."},
+    ])
+
+    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [showDetail, setShowDetail] = useState(false);
+
+    const handleCardClick = (data:any) => {
+        setSelectedUser(data);
+        setShowDetail(true);
+    }
     return(
         <div className="flex flex-col">
             <Header />
@@ -26,11 +41,19 @@ const KelolaUser:React.FC = () => {
                         </select>
                     </div>
                     <div className="flex flex-col gap-3">
-                        <CardUser nama="Oguri Cap" status="sudah-ambil" jumlah_ambil={5}  />
-                        <CardUser nama="Oguri Cap" status="belum-ambil" jumlah_ambil={5}  />
-                        <CardUser nama="Oguri Cap" status="sudah-setor" jumlah_ambil={5}  />
+                        {data.map((user, index)=>(
+                            <div key={index} onClick={()=>handleCardClick(user)}>
+                                <CardUser nama={user.nama} status={user.status} jumlah_ambil={user.jumlah_ambil} />
+                            </div>
+                        ))}
                     </div>
                 </main>
+                {
+                    showDetail && selectedUser && 
+                    <div className="bg-black/40 fixed inset-0 z-60 flex items-center justify-center" onClick={()=>setShowDetail(false)}>
+                        <DetailUser data={selectedUser}/>
+                    </div>
+                }
             <Navbar />
         </div>
     )
