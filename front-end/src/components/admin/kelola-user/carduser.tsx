@@ -11,7 +11,7 @@ interface props{
 
 const CardUser:React.FC<props> = ({id, nama, status, jumlah_ambil}) => {
     return(
-        <div className="bg-[#2e2e2e] flex flex-row p-2 rounded-xl hover:scale-105 transition-all hover:bg-white/10">
+        <div className="bg-[#2e2e2e] flex flex-row p-2 rounded-xl hover:scale-[102%] transition-all hover:bg-white/30 cursor-pointer">
             <img src="/image/pfp.jpg" className="w-[5rem] h-[5rem] object-cover rounded-2xl" />
             <div className="flex flex-col w-full pl-2">
                 <div className="flex flex-row justify-between items-center">

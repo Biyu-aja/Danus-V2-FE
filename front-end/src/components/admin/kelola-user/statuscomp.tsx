@@ -18,10 +18,10 @@ const StatusComp:React.FC<props> = ({status}) => {
 
     
     return(
-        <div className={`   ${status === "sudah-setor" && "bg-[#4C7600]/65 border-[#375500] text-[#c4ff55]"} 
-                            ${status === "sudah-ambil" && "bg-[#F8C300]/65 border-[#C99A00] text-[#FFF5B3]"}
-                            ${status === "belum-ambil" && "bg-[#D40000]/65 border-[#990000] text-[#FFB3B3]"}
-                            font-semibold border px-2 rounded-full`}>
+        <div className={`   ${status === "sudah-setor" && "bg-[#4C7600]/55 border-[#375500] text-[#c4ff55]"} 
+                            ${status === "sudah-ambil" && "bg-[#F8C300]/55 border-[#C99A00] text-[#FFF5B3]"}
+                            ${status === "belum-ambil" && "bg-[#D40000]/55 border-[#990000] text-[#FFB3B3]"}
+                            font-semibold border-2 px-2 rounded-full`}>
             <p>{title}</p>
         </div>
     )

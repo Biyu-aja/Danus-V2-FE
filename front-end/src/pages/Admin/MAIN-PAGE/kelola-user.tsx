@@ -1,8 +1,8 @@
 import React from "react";
-import Header from "../../components/general/header";
-import Navbar from "../../components/admin/general-admin/navbar";
-import SearchBar from "../../components/general/searchbar";
-import CardUser from "../../components/admin/kelola-user/carduser";
+import Header from "../../../components/general/header";
+import Navbar from "../../../components/admin/general-admin/navbar";
+import SearchBar from "../../../components/general/searchbar";
+import CardUser from "../../../components/admin/kelola-user/carduser";
 
 const KelolaUser:React.FC = () => {
     const dropdown = ([

@@ -1,18 +1,12 @@
-import http from 'http';
-import app from './app.js';
+import express from "express";
 
-// var key = fs.readFileSync("./certs/sade.key");
-// var cert = fs.readFileSync("./certs/sade.crt");
-// var options = {
-//   key: key,
-//   cert: cert,
-// };
+const app = express();
+const PORT = Number(process.env.PORT) || 3000;
 
-const port = process.env.PORT || 5001;
+app.get("/", (req, res) => res.send("Hello from Express backend!"));
 
-const server = http.createServer(app);
-// const server = https.createServer(app, options);
+app.get("/health", (req, res) => res.json({ ok: true, time: Date.now() }));
 
-server.listen(port, () => {
-  console.log(`Listening to port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Express server running at http://localhost:${PORT}`);
 });

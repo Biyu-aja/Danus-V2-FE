@@ -1,11 +1,11 @@
 import React from "react";
-import Navbar from "../../components/admin/general-admin/navbar";
-import Header from "../../components/general/header";
-import SearchBar from "../../components/general/searchbar";
+import Navbar from "../../../components/admin/general-admin/navbar";
+import Header from "../../../components/general/header";
+import SearchBar from "../../../components/general/searchbar";
 import { PlusIcon } from "lucide-react";
-import StokCard from "../../components/general/stokcard";
-import TitleAdd from "../../components/general/title-add";
-import CardBarang from "../../components/admin/kelola-barang/cardbarang";
+import StokCard from "../../../components/general/stokcard";
+import TitleAdd from "../../../components/general/title-add";
+import CardBarang from "../../../components/admin/kelola-barang/cardbarang";
 
 const KelolaBarang:React.FC = () =>{
     return(
@@ -25,7 +25,7 @@ const KelolaBarang:React.FC = () =>{
                         </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                        <TitleAdd title="Jenis Barang"/>
+                        <TitleAdd title="Jenis Barang" navigateTo="tambah-barang"/>
                         <div className="flex flex-row overflow-x-auto gap-3 p-2">
                             <CardBarang />
                         </div>

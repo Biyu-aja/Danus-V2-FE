@@ -1,11 +1,11 @@
 import React from "react";
-import Header from "../../components/general/header";
-import Navbar from "../../components/admin/general-admin/navbar";
-import Total_Saldo from "../../components/admin/general-admin/totalsaldo";
-import CardItem from "../../components/admin/general-admin/carditem";
+import Header from "../../../components/general/header";
+import Navbar from "../../../components/admin/general-admin/navbar";
+import Total_Saldo from "../../../components/admin/general-admin/totalsaldo";
+import CardItem from "../../../components/admin/general-admin/carditem";
 import { PlusIcon } from "lucide-react";
-import StokCard from "../../components/general/stokcard";
-import TitleAdd from "../../components/general/title-add";
+import StokCard from "../../../components/general/stokcard";
+import TitleAdd from "../../../components/general/title-add";
 
 const Dashboard:React.FC = () =>{
     return(
