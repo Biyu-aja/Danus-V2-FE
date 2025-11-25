@@ -14,7 +14,7 @@ const KelolaBarang:React.FC = () =>{
                 <main className="flex flex-col mt-[3.5rem] gap-3 p-3 mb-[3rem]">
                     <SearchBar placeholder="Cari Barang/Stok"/>
                     <div className="flex flex-col gap-1">
-                        <TitleAdd title="Stok Hari Ini"/>
+                        <TitleAdd title="Stok Hari Ini" navigateTo="tambah-stok"/>
                         <div className="flex flex-row overflow-x-auto gap-3 p-2">
                             <StokCard nama_item="Klepon" harga_item="12.000" jumlah_ambil={20} stok_tersisa={10} jumlah_setor={15}/>
                             <StokCard nama_item="Klepon" harga_item="12.000" jumlah_ambil={20} stok_tersisa={10} jumlah_setor={15}/>

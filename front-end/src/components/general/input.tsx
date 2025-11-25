@@ -10,21 +10,23 @@ interface props {
     isImportant?: boolean
     value?: string,
     setValue?: (value: string) => void
+    isWhite?: boolean
+    readonly?: boolean
 }
 
-const InputText:React.FC<props> = ({isPassword, label, placeholder, isImportant, value, setValue, isTextarea, rows}) => {
+const InputText:React.FC<props> = ({isPassword, label, placeholder, isImportant, value, setValue, isTextarea, rows, isWhite, readonly}) => {
     const [showPassword, setShowPassword] = useState(false)
     return(
         <div className="w-full flex flex-col gap-2">
             <p className="font-bold">{label ? isImportant ? <div className="flex flex-row gap-1"><p>{label}</p><p className="text-red-500">*</p></div> : <p>{label}</p> : ""}</p>
-            <div className="flex flex-row items-center rounded-lg">
+            <div className={`flex flex-row items-center rounded-lg border border-[#4f4f4f] ${isWhite ? "bg-white text-black" : "bg-[#1e1e1e] text-white"} `}>
                 {!isTextarea ?
-                    <div className="w-full flex flex-row items-center">
-                        <input value={value} onChange={(e)=>setValue?.(e.target.value)} type={isPassword ? showPassword ? "text" : "password" : "text"} className="w-full p-2 bg-[#1e1e1e] text-white rounded-lg outline-none" placeholder={placeholder ? `${placeholder}` : ""} /> <button className="outline-none" onClick={()=>setShowPassword(!showPassword)}>{isPassword ? showPassword ? <div><Eye className="text-black" /></div> : <div><EyeClosed className="text-black" /></div> : "" }</button> 
+                    <div className="w-full flex flex-row items-center px-2">
+                        <input value={value} onChange={(e)=>setValue?.(e.target.value)} readOnly={readonly}  type={isPassword ? showPassword ? "text" : "password" : "text"} className={`w-full p-2 ${isWhite ? "bg-white" : "bg-[#1e1e1e]"}  rounded-lg outline-none`} placeholder={placeholder ? `${placeholder}` : ""} /> <button className="outline-none" onClick={()=>setShowPassword(!showPassword)}>{isPassword ? showPassword ? <div><Eye /></div> : <div><EyeClosed /></div> : "" }</button> 
                     </div>
                     :
-                    <div className="w-full">
-                        <textarea value={value} onChange={(e)=>setValue?.(e.target.value)} rows={rows} className="w-full p-2 bg-[#1e1e1e] text-white rounded-lg outline-none" placeholder={placeholder ? `${placeholder}` : ""} />
+                    <div className="w-full px-2">
+                        <textarea value={value} onChange={(e)=>setValue?.(e.target.value)} readOnly={readonly} rows={rows} className={`w-full p-2 ${isWhite ? "bg-white " : "bg-[#1e1e1e] "}  rounded-lg outline-none`} placeholder={placeholder ? `${placeholder}` : ""} />
                     </div>
                 }                
             </div>

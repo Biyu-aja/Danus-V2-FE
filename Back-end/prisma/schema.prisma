@@ -13,10 +13,60 @@ datasource db {
   provider = "postgresql"
 }
 
-model users {
-  id          Int      @id @default(autoincrement())
-  email       String   @unique
-  password    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Users {
+  id            Int       @id @default(autoincrement())
+  nama_lengkap  String 
+  username      String
+  nomor_telepon String
+  email         String    @unique
+  role          String    @default("user") 
+  password      String
+  catatan       String?    @db.Text
+
+  absen         Absen[]
 }
+
+model Absen {
+  id            Int       @id @default(autoincrement())
+  user_id       Int
+  tanggal_absen DateTime  @default(now())
+  setor_kepada  Int 
+  status        String
+  keterangan    String?   @db.Text
+
+  users         Users     @relation(fields: [user_id], references: [id])
+  detail_absen  Detail_absen[]
+}
+
+model Detail_absen {
+  id            Int       @id @default(autoincrement())
+  id_absen      Int
+  id_stok       Int
+  qty           Int
+  total_harga   Int
+
+  absen        Absen     @relation(fields: [id_absen], references: [id])
+  stok         Stok      @relation(fields: [id_stok], references: [id])
+}
+
+model Stok{
+  id Int @id @default(autoincrement())
+  id_barang Int
+  harga Int
+  stok Int
+  modal Int
+  keterangan String? @db.Text
+
+  barang barang @relation(fields: [id_barang], references: [id])
+  detail_absen Detail_absen[]
+}
+
+model barang {
+  id Int @id @default(autoincrement())
+  nama String
+  keterangan String? @db.Text
+
+  stok Stok[]
+}
+
+

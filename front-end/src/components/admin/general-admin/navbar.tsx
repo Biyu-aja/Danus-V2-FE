@@ -17,7 +17,7 @@ const Navbar: React.FC = () => {
     const active = location.pathname.split("/").pop();
 
     return (
-        <div className="fixed bottom-0 flex flex-row justify-around text-[#B09331] items-center bg-[#1C1C20] rounded-t-xl w-full h-[3rem]">
+        <div className="fixed bottom-0 flex flex-row justify-around z-[60] text-[#B09331] items-center bg-[#1C1C20] rounded-t-xl w-full h-[3rem]">
             {icon.map((data) => (
                 <div
                     key={data.id}
