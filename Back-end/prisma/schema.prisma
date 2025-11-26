@@ -3,21 +3,64 @@ generator client {
 }
 
 datasource db {
-    provider = "mysql"
+    provider = "postgresql"
     url      = env("DATABASE_URL")
 }
 
-model User {
-  id         String      @id @default(uuid())
-  email      String      @unique
-  password   String
-  phoneWA    String?     @unique
-  name       String?
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  lastLogin  DateTime?
-  isActive   Boolean     @default(true)
-  role       String      @default("user")
-  profile    String?
+model Users {
+  id            Int     @id @default(autoincrement())
+  nama_lengkap  String
+  username      String
+  nomor_telepon String
+  email         String  @unique
+  role          String  @default("user")
+  password      String
+  catatan       String? @db.Text
 
+  absen      Absen[]
+  setorMasuk Absen[] @relation("SetoranToAdmin")
+}
+
+model Absen {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  tanggal_absen DateTime @default(now())
+  setorKepadaId Int
+  status        String
+  keterangan    String?  @db.Text
+
+  user         Users          @relation(fields: [user_id], references: [id])
+  setorKepada  Users          @relation("SetoranToAdmin", fields: [setorKepadaId], references: [id])
+  detail_absen Detail_absen[]
+}
+
+model Detail_absen {
+  id          Int @id @default(autoincrement())
+  id_absen    Int
+  id_stok     Int
+  qty         Int
+  total_harga Int
+
+  absen Absen @relation(fields: [id_absen], references: [id])
+  stok  Stok  @relation(fields: [id_stok], references: [id])
+}
+
+model Stok {
+  id         Int     @id @default(autoincrement())
+  id_barang  Int
+  harga      Int
+  stok       Int
+  modal      Int
+  keterangan String? @db.Text
+
+  barang       Barang         @relation(fields: [id_barang], references: [id])
+  detail_absen Detail_absen[]
+}
+
+model Barang {
+  id         Int     @id @default(autoincrement())
+  nama       String
+  keterangan String? @db.Text
+
+  stok Stok[]
 }
