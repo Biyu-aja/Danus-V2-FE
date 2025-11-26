@@ -7,9 +7,38 @@ const Auth:React.FC = () =>{
     const [password, setPassword] = useState("")
     const navigate = useNavigate()
 
-    const handleAuth = () =>{
-        if(username === "admin" && password == "123") navigate("/admin")
+    const handleAuth = async () => {
+    try {
+        const res = await fetch("http://localhost:3000/api/Login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+        alert(data.message);
+        return;
+        }
+
+        // save user
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // 👇 ROLE-BASED NAVIGATION
+        if (data.user.role === "admin") {
+        navigate("/admin");
+        } else {
+        navigate("/user");
+        }
+
+    } catch (err) {
+        alert("Network error");
+        console.error(err);
     }
+    };
+
+
     return(
         <div className="w-screen h-screen flex justify-center items-center bg-[#B09331]">
             <div className="flex flex-col bg-[#2D2322] w-[80%] items-center p-4 rounded-2xl h-fit">

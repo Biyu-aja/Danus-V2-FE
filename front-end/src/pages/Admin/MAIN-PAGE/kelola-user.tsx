@@ -51,7 +51,7 @@ const KelolaUser:React.FC = () => {
                 {
                     showDetail && selectedUser && 
                     <div className="bg-black/40 fixed inset-0 z-60 flex items-center justify-center" onClick={()=>setShowDetail(false)}>
-                        <DetailUser data={selectedUser}/>
+                        <DetailUser data={selectedUser} onclose={()=>setShowDetail(false)}/>
                     </div>
                 }
             <Navbar />
