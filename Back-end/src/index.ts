@@ -1,18 +1,11 @@
-import http from 'http';
-import app from './app.js';
+import express from 'express';
+import type { Application } from 'express';
+import userRouter from './routes/user.route';
 
-// var key = fs.readFileSync("./certs/sade.key");
-// var cert = fs.readFileSync("./certs/sade.crt");
-// var options = {
-//   key: key,
-//   cert: cert,
-// };
+const app: Application = express();
+app.use(express.json());
 
-const port = process.env.PORT || 5001;
+// register routes
+app.use('/api/user', userRouter);
 
-const server = http.createServer(app);
-// const server = https.createServer(app, options);
-
-server.listen(port, () => {
-  console.log(`Listening to port ${port}`);
-});
+export default app;

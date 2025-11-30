@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
  "type": "module",
  "scripts": {
-    "dev": "cross-env NODE_ENV=development tsx watch src/index.ts",
+    "dev": "cross-env NODE_ENV=development tsx watch src/server.ts",
     "build": "tsup src/index.ts --format esm --platform node --target es2022 --dts --out-dir dist",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "gen:core" : "npx tsx generator/core.ts"

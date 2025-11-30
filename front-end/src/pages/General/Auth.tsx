@@ -8,34 +8,35 @@ const Auth:React.FC = () =>{
     const navigate = useNavigate()
 
     const handleAuth = async () => {
-    try {
-        const res = await fetch("http://localhost:3000/api/Login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-        });
+    // try {
+    //     const res = await fetch("http://localhost:3000/api/Login", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({ username, password }),
+    //     });
 
-        const data = await res.json();
+    //     const data = await res.json();
 
-        if (!res.ok) {
-        alert(data.message);
-        return;
-        }
+    //     if (!res.ok) {
+    //     alert(data.message);
+    //     return;
+    //     }
 
-        // save user
-        localStorage.setItem("user", JSON.stringify(data.user));
+    //     // save user
+    //     localStorage.setItem("user", JSON.stringify(data.user));
 
-        // 👇 ROLE-BASED NAVIGATION
-        if (data.user.role === "admin") {
-        navigate("/admin");
-        } else {
-        navigate("/user");
-        }
+    //     // 👇 ROLE-BASED NAVIGATION
+    //     if (data.user.role === "admin") {
+    //     navigate("/admin");
+    //     } else {
+    //     navigate("/user");
+    //     }
 
-    } catch (err) {
-        alert("Network error");
-        console.error(err);
-    }
+    // } catch (err) {
+    //     alert("Network error");
+    //     console.error(err);
+    // }
+    navigate("/admin");
     };
 
 
