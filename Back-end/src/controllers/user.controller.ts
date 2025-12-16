@@ -1,20 +1,23 @@
-import type { Request, Response } from 'express';
-import prisma from '../utils/prisma.js';
+import { Request, Response } from 'express';
+import { userService } from '../services/user.service';
+import { successResponse } from '../utils/response';
+import { asyncHandler } from '../utils/error';
 
-export const getAllUsers = async (req: Request, res: Response) => {
-  try {
-    const users = await prisma.users.findMany();
+/**
+ * GET /api/users
+ * Get all users
+ */
+export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
+    const users = await userService.getAllUsers();
+    return successResponse(res, users, 'Berhasil mendapatkan data users');
+});
 
-    res.status(200).json({
-      success: true,
-      data: users,
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
-};
+/**
+ * GET /api/users/:id
+ * Get user by ID
+ */
+export const getUserById = asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    const user = await userService.getUserById(id);
+    return successResponse(res, user, 'Berhasil mendapatkan data user');
+});
