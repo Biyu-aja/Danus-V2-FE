@@ -1,66 +1,88 @@
-generator client {
+  generator client {
     provider = "prisma-client-js"
-}
+  }
 
-datasource db {
+  datasource db {
     provider = "postgresql"
     url      = env("DATABASE_URL")
-}
+  }
 
-model Users {
-  id            Int     @id @default(autoincrement())
-  nama_lengkap  String
-  username      String
-  nomor_telepon String
-  email         String  @unique
-  role          String  @default("user")
-  password      String
-  catatan       String? @db.Text
+  model User {
+    id            Int      @id @default(autoincrement())
+    nama_lengkap  String
+    username      String   @unique
+    nomor_telepon String
+    password      String
+    role          String   @default("user")
+    catatan       String?  @db.Text
 
-  absen      Absen[]
-  setorMasuk Absen[] @relation("SetoranToAdmin")
-}
+    ambilBarang   AmbilBarang[] @relation("UserAmbil")
+    setorDiterima AmbilBarang[] @relation("AdminSetor")
+  }
 
-model Absen {
-  id            Int      @id @default(autoincrement())
-  user_id       Int
-  tanggal_absen DateTime @default(now())
-  setorKepadaId Int
-  status        String
-  keterangan    String?  @db.Text
+  model Barang {
+    id         Int     @id @default(autoincrement())
+    nama       String
+    keterangan String? @db.Text
 
-  user         Users          @relation(fields: [user_id], references: [id])
-  setorKepada  Users          @relation("SetoranToAdmin", fields: [setorKepadaId], references: [id])
-  detail_absen Detail_absen[]
-}
+    stokHarian StokHarian[]
+  }
 
-model Detail_absen {
-  id          Int @id @default(autoincrement())
-  id_absen    Int
-  id_stok     Int
-  qty         Int
-  total_harga Int
+  model StokHarian {
+    id           Int      @id @default(autoincrement())
+    barangId     Int
+    harga        Int
+    stok         Int
+    modal        Int
+    keterangan   String?  @db.Text
+    tanggalEdar  DateTime
 
-  absen Absen @relation(fields: [id_absen], references: [id])
-  stok  Stok  @relation(fields: [id_stok], references: [id])
-}
+    barang       Barang       @relation(fields: [barangId], references: [id])
+    detailSetor  DetailSetor[]
+  }
 
-model Stok {
-  id         Int     @id @default(autoincrement())
-  id_barang  Int
-  harga      Int
-  stok       Int
-  modal      Int
-  keterangan String? @db.Text
+  model AmbilBarang {
+    id            Int      @id @default(autoincrement())
+    userId        Int
+    setorKepadaId Int
+    status        String   @default("BELUM_SETOR")
+    keterangan    String?  @db.Text
+    tanggalAmbil  DateTime @default(now())
 
-  barang       Barang         @relation(fields: [id_barang], references: [id])
-  detail_absen Detail_absen[]
-}
+    user          User @relation("UserAmbil", fields: [userId], references: [id])
+    setorKepada   User @relation("AdminSetor", fields: [setorKepadaId], references: [id])
 
-model Barang {
-  id         Int     @id @default(autoincrement())
-  nama       String
-  keterangan String? @db.Text
+    detailSetor   DetailSetor[]
+  }
 
-  stok Stok[]
-}
+  model DetailSetor {
+    id            Int      @id @default(autoincrement())
+    ambilBarangId Int
+    stokHarianId  Int
+    qty           Int
+    totalHarga    Int
+    tanggalSetor  DateTime?
+
+    ambilBarang   AmbilBarang @relation(fields: [ambilBarangId], references: [id])
+    stokHarian    StokHarian  @relation(fields: [stokHarianId], references: [id])
+
+    detailKeuangan DetailKeuangan?
+  }
+
+  model Keuangan {
+    id          Int      @id @default(1)
+    totalSaldo  Int
+    updatedAt   DateTime @updatedAt
+  }
+
+  model DetailKeuangan {
+    id             Int      @id @default(autoincrement())
+    detailSetorId  Int?     @unique
+    title          String
+    tipe           String   // PEMASUKAN / PENGELUARAN
+    nominal        Int
+    keterangan     String?  @db.Text
+    createdAt      DateTime @default(now())
+
+    detailSetor    DetailSetor? @relation(fields: [detailSetorId], references: [id])
+  }

@@ -18,7 +18,7 @@ const InputText:React.FC<props> = ({isPassword, label, placeholder, isImportant,
     const [showPassword, setShowPassword] = useState(false)
     return(
         <div className="w-full flex flex-col gap-2">
-            <p className="font-bold">{label ? isImportant ? <div className="flex flex-row gap-1"><p>{label}</p><p className="text-red-500">*</p></div> : <p>{label}</p> : ""}</p>
+            <div className="font-bold">{label ? isImportant ? <div className="flex flex-row gap-1"><p>{label}</p><p className="text-red-500">*</p></div> : <p>{label}</p> : ""}</div>
             <div className={`flex flex-row items-center rounded-lg border border-[#4f4f4f] ${isWhite ? "bg-white text-black" : "bg-[#1e1e1e] text-white"} `}>
                 {!isTextarea ?
                     <div className="w-full flex flex-row items-center px-2">
