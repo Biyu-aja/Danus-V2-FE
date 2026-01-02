@@ -45,6 +45,40 @@ export class StokRepository {
     }
 
     /**
+     * Get stok hari ini dengan detail setor untuk perhitungan jumlah_ambil & jumlah_setor
+     */
+    async findTodayWithDetails() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        return prisma.stokHarian.findMany({
+            where: {
+                tanggalEdar: {
+                    gte: today,
+                    lt: tomorrow,
+                },
+            },
+            include: {
+                barang: true,
+                detailSetor: {
+                    select: {
+                        qty: true,
+                        tanggalSetor: true,
+                        ambilBarang: {
+                            select: {
+                                userId: true
+                            }
+                        }
+                    },
+                },
+            },
+            orderBy: { tanggalEdar: 'desc' },
+        });
+    }
+
+    /**
      * Get histori stok dengan pagination
      */
     async findHistori(page: number = 1, limit: number = 20) {

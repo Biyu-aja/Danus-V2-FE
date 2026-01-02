@@ -60,6 +60,63 @@ export class UserRepository {
             },
         });
     }
+
+    /**
+     * Get all users with today's ambil barang status
+     */
+    async findAllWithTodayStatus() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        return prisma.user.findMany({
+            where: {
+                role: 'user', // Only get users, not admin
+            },
+            select: {
+                id: true,
+                nama_lengkap: true,
+                username: true,
+                nomor_telepon: true,
+                role: true,
+                catatan: true,
+                ambilBarang: {
+                    where: {
+                        tanggalAmbil: {
+                            gte: today,
+                            lt: tomorrow,
+                        },
+                    },
+                    select: {
+                        id: true,
+                        status: true,
+                        tanggalAmbil: true,
+                        detailSetor: {
+                            select: {
+                                qty: true,
+                                totalHarga: true,
+                                tanggalSetor: true,
+                                stokHarian: {
+                                    select: {
+                                        id: true,
+                                        barang: {
+                                            select: {
+                                                id: true,
+                                                nama: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    orderBy: { tanggalAmbil: 'desc' },
+                },
+            },
+            orderBy: { nama_lengkap: 'asc' },
+        });
+    }
 }
 
 export const userRepository = new UserRepository();

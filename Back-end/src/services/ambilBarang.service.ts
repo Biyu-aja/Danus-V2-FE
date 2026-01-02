@@ -59,6 +59,11 @@ export class AmbilBarangService {
 
         // Create dalam transaction
         return withTransaction(async (tx) => {
+            // Kurangi stok untuk setiap item
+            for (const item of itemsWithPrice) {
+                await stokRepository.decrementStok(tx, item.stokHarianId, item.qty);
+            }
+
             // Create ambil barang dengan detail
             const ambilBarang = await ambilBarangRepository.create(tx, {
                 userId: data.userId,

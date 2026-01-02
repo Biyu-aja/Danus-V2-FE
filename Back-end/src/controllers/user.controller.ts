@@ -13,6 +13,15 @@ export const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/users/status-hari-ini
+ * Get all users with today's ambil barang status
+ */
+export const getUsersWithTodayStatus = asyncHandler(async (req: Request, res: Response) => {
+    const users = await userService.getUsersWithTodayStatus();
+    return successResponse(res, users, 'Berhasil mendapatkan status user hari ini');
+});
+
+/**
  * GET /api/users/:id
  * Get user by ID
  */
