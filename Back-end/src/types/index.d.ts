@@ -7,6 +7,13 @@ export type TipeKeuangan = 'PEMASUKAN' | 'PENGELUARAN';
 
 // ============ REQUEST TYPES ============
 
+// Barang
+export interface CreateBarangRequest {
+    nama: string;
+    keterangan?: string;
+    gambar?: string;
+}
+
 // Stok
 export interface CreateStokHarianRequest {
     barangId: number;
@@ -29,8 +36,17 @@ export interface CreateAmbilBarangRequest {
 }
 
 // Setor
+// Setor
+export interface ProsesSetorItem {
+    detailSetorId: number;
+    qty: number;
+}
+
 export interface ProsesSetorRequest {
-    detailSetorIds: number[];
+    adminId?: number;
+    items: ProsesSetorItem[];
+    // Deprecated but kept for backward compatibility checking
+    detailSetorIds?: number[];
 }
 
 // Keuangan

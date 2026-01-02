@@ -41,10 +41,33 @@ export class StokService {
     }
 
     /**
-     * Get stok hari ini
+     * Get stok hari ini dengan perhitungan jumlah_ambil dan jumlah_setor
      */
     async getStokHariIni() {
-        return stokRepository.findToday();
+        const stokList = await stokRepository.findTodayWithDetails();
+
+        // Calculate jumlah_ambil dan jumlah_setor untuk setiap stok
+        return stokList.map(stok => {
+            let jumlah_ambil = 0;
+            const uniqueSetorUsers = new Set<number>();
+
+            if (stok.detailSetor) {
+                for (const detail of stok.detailSetor) {
+                    jumlah_ambil += detail.qty;
+                    if (detail.tanggalSetor) {
+                        // Count unique users who have deposited
+                        // Using any casting because repository includes related data but types might not be regenerated yet
+                        uniqueSetorUsers.add((detail as any).ambilBarang.userId);
+                    }
+                }
+            }
+
+            return {
+                ...stok,
+                jumlah_ambil,
+                jumlah_setor: uniqueSetorUsers.size,
+            };
+        });
     }
 
     /**

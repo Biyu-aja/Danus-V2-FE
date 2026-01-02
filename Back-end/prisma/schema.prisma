@@ -24,6 +24,7 @@
     id         Int     @id @default(autoincrement())
     nama       String
     keterangan String? @db.Text
+    gambar     String? @db.Text
 
     stokHarian StokHarian[]
   }

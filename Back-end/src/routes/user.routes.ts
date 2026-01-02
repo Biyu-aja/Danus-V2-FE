@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAllUsers, getUserById } from '../controllers/user.controller';
+import { getAllUsers, getUserById, getUsersWithTodayStatus } from '../controllers/user.controller';
 
 const router = Router();
 
@@ -8,6 +8,12 @@ const router = Router();
  * @desc Get all users
  */
 router.get('/', getAllUsers);
+
+/**
+ * @route GET /api/users/status-hari-ini
+ * @desc Get all users with today's ambil barang status
+ */
+router.get('/status-hari-ini', getUsersWithTodayStatus);
 
 /**
  * @route GET /api/users/:id

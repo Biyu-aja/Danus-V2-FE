@@ -53,9 +53,6 @@ export class SetorRepository {
         return details.every((d) => d.tanggalSetor !== null);
     }
 
-    /**
-     * Check apakah ada detail yang sudah setor
-     */
     async hasAnySetor(tx: TransactionClient, ambilBarangId: number) {
         const count = await tx.detailSetor.count({
             where: {
@@ -64,6 +61,35 @@ export class SetorRepository {
             },
         });
         return count > 0;
+    }
+
+    // UPDATE QTY & PRICE (untuk sisa yang belum disetor)
+    async updateQtyAndTotalHarga(tx: TransactionClient, id: number, qty: number, totalHarga: number) {
+        return tx.detailSetor.update({
+            where: { id },
+            data: { qty, totalHarga },
+        });
+    }
+
+    // CREATE NEW DETAIL SETOR (untuk bagian yang disetor)
+    async createDetailSetor(tx: TransactionClient, data: {
+        ambilBarangId: number,
+        stokHarianId: number,
+        qty: number,
+        totalHarga: number,
+        tanggalSetor: Date
+    }) {
+        return tx.detailSetor.create({
+            data,
+        });
+    }
+
+    // UPDATE AMBIL BARANG SETOR KEPADA
+    async updateSetorKepada(tx: TransactionClient, ambilBarangId: number, adminId: number) {
+        return tx.ambilBarang.update({
+            where: { id: ambilBarangId },
+            data: { setorKepadaId: adminId }
+        });
     }
 }
 
