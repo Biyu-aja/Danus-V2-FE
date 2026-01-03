@@ -156,6 +156,43 @@ export class StokRepository {
             },
         });
     }
+
+    /**
+     * Update stok harian - dalam transaction
+     */
+    async update(tx: TransactionClient, id: number, data: {
+        harga?: number;
+        stok?: number;
+        modal?: number;
+        keterangan?: string;
+    }) {
+        return tx.stokHarian.update({
+            where: { id },
+            data,
+            include: {
+                barang: true,
+            },
+        });
+    }
+
+    /**
+     * Delete stok harian - dalam transaction
+     */
+    async delete(tx: TransactionClient, id: number) {
+        return tx.stokHarian.delete({
+            where: { id },
+        });
+    }
+
+    /**
+     * Check if stok has any detailSetor (sudah diambil)
+     */
+    async hasDetailSetor(id: number) {
+        const count = await prisma.detailSetor.count({
+            where: { stokHarianId: id },
+        });
+        return count > 0;
+    }
 }
 
 export const stokRepository = new StokRepository();

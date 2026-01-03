@@ -69,6 +69,46 @@ export class KeuanganService {
     }
 
     /**
+     * Catat pemasukan manual
+     */
+    async createPemasukan(data: CreatePengeluaranRequest) {
+        // Validasi
+        if (!data.title || data.title.trim() === '') {
+            throw new ValidationError('Title tidak boleh kosong');
+        }
+        if (data.nominal <= 0) {
+            throw new ValidationError('Nominal harus lebih dari 0');
+        }
+
+        // Ensure saldo exists
+        await keuanganRepository.initializeSaldo();
+
+        // Proses dalam transaction
+        return withTransaction(async (tx) => {
+            // Catat ke histori
+            await keuanganRepository.createDetailKeuangan(tx, {
+                title: data.title,
+                tipe: 'PEMASUKAN',
+                nominal: data.nominal,
+                keterangan: data.keterangan,
+            });
+
+            // Update saldo (increment)
+            const updatedSaldo = await keuanganRepository.updateSaldo(tx, data.nominal);
+
+            return {
+                message: 'Pemasukan berhasil dicatat',
+                pemasukan: {
+                    title: data.title,
+                    nominal: data.nominal,
+                    keterangan: data.keterangan,
+                },
+                saldoTerbaru: updatedSaldo.totalSaldo,
+            };
+        });
+    }
+
+    /**
      * Get laporan harian
      */
     async getLaporanHarian(tanggal?: string) {

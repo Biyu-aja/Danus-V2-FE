@@ -50,3 +50,32 @@ export const getHistoriStok = asyncHandler(async (req: Request, res: Response) =
         total: result.total
     }, 'Berhasil mendapatkan histori stok');
 });
+
+/**
+ * PUT /api/stok/:id
+ * Update stok harian
+ */
+export const updateStokHarian = asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+        throw new ValidationError('ID stok tidak valid');
+    }
+
+    const data = req.body;
+    const stok = await stokService.updateStokHarian(id, data);
+    return successResponse(res, stok, 'Berhasil mengupdate stok harian');
+});
+
+/**
+ * DELETE /api/stok/:id
+ * Delete stok harian
+ */
+export const deleteStokHarian = asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+        throw new ValidationError('ID stok tidak valid');
+    }
+
+    const result = await stokService.deleteStokHarian(id);
+    return successResponse(res, result, 'Berhasil menghapus stok harian');
+});

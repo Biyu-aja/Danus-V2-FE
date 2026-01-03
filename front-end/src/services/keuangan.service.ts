@@ -81,6 +81,33 @@ export const keuanganService = {
     },
 
     /**
+     * Create pemasukan manual
+     */
+    async createPemasukan(payload: {
+        title: string;
+        nominal: number;
+        keterangan?: string;
+    }): Promise<any> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/keuangan/pemasukan`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message);
+            }
+
+            return data.data;
+        } catch (error) {
+            console.error('Error creating pemasukan:', error);
+            throw error;
+        }
+    },
+
+    /**
      * Get laporan harian
      */
     async getLaporanHarian(tanggal?: string): Promise<LaporanHarian> {
