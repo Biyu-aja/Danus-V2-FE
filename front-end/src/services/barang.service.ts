@@ -275,6 +275,82 @@ export const stokService = {
             };
         }
     },
+
+    /**
+     * Update stok harian
+     */
+    async updateStok(id: number, data: {
+        harga?: number;
+        stok?: number;
+        modal?: number;
+        keterangan?: string;
+    }): Promise<ApiResponse<StokHarian>> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/stok/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            const resData = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: resData.message || 'Gagal mengupdate stok',
+                };
+            }
+
+            return {
+                success: true,
+                message: resData.message || 'Berhasil mengupdate stok',
+                data: resData.data,
+            };
+        } catch (error) {
+            console.error('Update stok error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
+    },
+
+    /**
+     * Delete stok harian
+     */
+    async deleteStok(id: number): Promise<ApiResponse<{ refundedModal: number }>> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/stok/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const resData = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: resData.message || 'Gagal menghapus stok',
+                };
+            }
+
+            return {
+                success: true,
+                message: resData.message || 'Berhasil menghapus stok',
+                data: resData.data,
+            };
+        } catch (error) {
+            console.error('Delete stok error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
+    },
 };
 
 export default { barangService, stokService };

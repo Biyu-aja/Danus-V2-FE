@@ -43,6 +43,22 @@ export const createPengeluaran = asyncHandler(async (req: Request, res: Response
 });
 
 /**
+ * POST /api/keuangan/pemasukan
+ * Catat pemasukan manual
+ */
+export const createPemasukan = asyncHandler(async (req: Request, res: Response) => {
+    const data: CreatePengeluaranRequest = req.body;
+
+    // Basic validation
+    if (!data.title || data.nominal === undefined) {
+        throw new ValidationError('title dan nominal wajib diisi');
+    }
+
+    const result = await keuanganService.createPemasukan(data);
+    return successResponse(res, result, 'Berhasil mencatat pemasukan', 201);
+});
+
+/**
  * GET /api/keuangan/laporan/harian
  * Get laporan harian
  */

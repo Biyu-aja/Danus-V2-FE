@@ -100,6 +100,19 @@ const KelolaBarang: React.FC = () => {
         setSelectedStok(null);
     };
 
+    // Handle update stok
+    const handleUpdateStok = (updatedStok: StokHarian) => {
+        setStokHariIni(prev => prev.map(s => s.id === updatedStok.id ? {...s, ...updatedStok} : s));
+        setSelectedStok(updatedStok);
+    };
+
+    // Handle delete stok
+    const handleDeleteStok = (id: number) => {
+        setStokHariIni(prev => prev.filter(s => s.id !== id));
+        setShowDetailStok(false);
+        setSelectedStok(null);
+    };
+
     // Filter berdasarkan search query
     const filteredBarang = barangList.filter(barang => 
         barang.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -234,6 +247,8 @@ const KelolaBarang: React.FC = () => {
                 stok={selectedStok}
                 isOpen={showDetailStok}
                 onClose={handleCloseStokDetail}
+                onUpdate={handleUpdateStok}
+                onDelete={handleDeleteStok}
             />
         </div>
     );

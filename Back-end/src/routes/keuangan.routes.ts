@@ -3,6 +3,7 @@ import {
     getSaldo,
     getHistoriTransaksi,
     createPengeluaran,
+    createPemasukan,
     getLaporanHarian,
     getLaporanBulanan,
 } from '../controllers/keuangan.controller';
@@ -26,6 +27,12 @@ router.get('/histori', getHistoriTransaksi);
  * @desc Catat pengeluaran manual
  */
 router.post('/pengeluaran', createPengeluaran);
+
+/**
+ * @route POST /api/keuangan/pemasukan
+ * @desc Catat pemasukan manual
+ */
+router.post('/pemasukan', createPemasukan);
 
 /**
  * @route GET /api/keuangan/laporan/harian
