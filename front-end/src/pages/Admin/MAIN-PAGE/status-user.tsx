@@ -346,10 +346,8 @@ const StatusUserPage: React.FC = () => {
                                                 </h3>
                                                 <StatusBadge status={user.status} />
                                             </div>
-                                            <p className="text-[#888] text-sm">@{user.username}</p>
-                                            <div className="flex items-center gap-1 mt-1 text-[#666] text-xs">
-                                                <Phone className="w-3 h-3" />
-                                                {user.nomor_telepon}
+                                            <div className="flex items-center gap-1 mt-1 text-[#ffffff] text-xs">
+                                                <a href={`https://wa.me/${user.nomor_telepon}`} className="bg-[#B09331] px-2 py-1 rounded-full flex items-center gap-1"><Phone className="w-3 h-3" />{user.nomor_telepon}</a>
                                             </div>
                                         </div>
 
@@ -357,14 +355,14 @@ const StatusUserPage: React.FC = () => {
                                         <div className="text-right flex-shrink-0 flex items-center gap-3">
                                             {user.status !== 'BELUM_AMBIL' && (
                                                 <div>
-                                                    <p className="text-[#888] text-xs">Item diambil</p>
-                                                    <p className="text-white font-bold">{user.totalAmbil}</p>
+                                                    <div className="flex flex-row items-center gap-1">
+                                                        <p className="text-[#ffffff] text-xs">Item diambil: {user.totalAmbil}</p>
+                                                    </div>
                                                     <p className="text-[#B09331] text-sm font-semibold mt-1">
                                                         Rp {formatRupiah(user.totalHarusSetor)}
                                                     </p>
                                                 </div>
                                             )}
-                                            <ChevronRight className="w-5 h-5 text-[#444] group-hover:text-[#B09331] transition-colors" />
                                         </div>
                                     </div>
 

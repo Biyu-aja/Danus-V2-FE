@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/admin/general-admin/navbar";
 import Header from "../../../components/general/header";
 import SearchBar from "../../../components/general/searchbar";
@@ -9,9 +10,11 @@ import DetailBarang from "../../../components/admin/kelola-barang/detail-barang"
 import DetailStokModal from "../../../components/admin/kelola-barang/detail-stok-modal";
 import { barangService, stokService } from "../../../services/barang.service";
 import type { Barang, StokHarian } from "../../../types/barang.types";
-import { Loader2, Package, Boxes } from "lucide-react";
+import { Loader2, Package, Boxes, History } from "lucide-react";
 
 const KelolaBarang: React.FC = () => {
+    const navigate = useNavigate();
+    
     // State untuk data
     const [barangList, setBarangList] = useState<Barang[]>([]);
     const [stokHariIni, setStokHariIni] = useState<StokHarian[]>([]);
@@ -119,7 +122,16 @@ const KelolaBarang: React.FC = () => {
 
                 {/* Stok Hari Ini Section */}
                 <div className="flex flex-col gap-2">
-                    <TitleAdd title="Stok Hari Ini" navigateTo="tambah-stok" />
+                    <div className="flex items-center justify-between">
+                        <TitleAdd title="Stok Hari Ini" navigateTo="tambah-stok" />
+                        <button
+                            onClick={() => navigate('/admin/histori-stok')}
+                            className="flex items-center gap-1.5 text-[#B09331] text-sm hover:underline"
+                        >
+                            <History className="w-4 h-4" />
+                            Lihat Histori
+                        </button>
+                    </div>
                     
                     {isLoadingStok ? (
                         <div className="flex items-center justify-center h-[16rem] bg-[#1e1e1e] rounded-xl">

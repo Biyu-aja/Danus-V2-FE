@@ -79,21 +79,53 @@ export class StokRepository {
     }
 
     /**
-     * Get histori stok dengan pagination
+     * Get histori stok dengan pagination dan filter
      */
-    async findHistori(page: number = 1, limit: number = 20) {
+    async findHistori(options: {
+        page?: number;
+        limit?: number;
+        startDate?: Date;
+        endDate?: Date;
+        barangId?: number;
+    } = {}) {
+        const { page = 1, limit = 50, startDate, endDate, barangId } = options;
         const skip = (page - 1) * limit;
+
+        // Build where clause
+        const where: any = {};
+
+        if (startDate || endDate) {
+            where.tanggalEdar = {};
+            if (startDate) where.tanggalEdar.gte = startDate;
+            if (endDate) where.tanggalEdar.lte = endDate;
+        }
+
+        if (barangId) {
+            where.barangId = barangId;
+        }
 
         const [data, total] = await Promise.all([
             prisma.stokHarian.findMany({
+                where,
                 skip,
                 take: limit,
                 include: {
                     barang: true,
+                    detailSetor: {
+                        select: {
+                            qty: true,
+                            tanggalSetor: true,
+                            ambilBarang: {
+                                select: {
+                                    userId: true
+                                }
+                            }
+                        }
+                    }
                 },
                 orderBy: { tanggalEdar: 'desc' },
             }),
-            prisma.stokHarian.count(),
+            prisma.stokHarian.count({ where }),
         ]);
 
         return { data, total };

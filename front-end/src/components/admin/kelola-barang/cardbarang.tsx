@@ -13,7 +13,7 @@ const CardBarang: React.FC<props> = ({ id, nama, keterangan, gambar, onClick }) 
     return (
         <div 
             onClick={onClick}
-            className="relative min-w-[9rem] max-w-[9rem] h-[16rem] rounded-xl hover:scale-[102%] cursor-pointer transition-all overflow-hidden shadow-lg"
+            className="relative w-[11rem] h-[15rem] rounded-xl hover:scale-[102%] cursor-pointer transition-all overflow-hidden shadow-lg"
         >
             {/* Background Image or Placeholder */}
             {gambar ? (

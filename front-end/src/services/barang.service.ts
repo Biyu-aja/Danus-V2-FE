@@ -224,6 +224,57 @@ export const stokService = {
             };
         }
     },
+
+    /**
+     * Get histori stok dengan filter
+     */
+    async getHistoriStok(filters?: {
+        startDate?: string;
+        endDate?: string;
+        barangId?: number;
+        page?: number;
+        limit?: number;
+    }): Promise<ApiResponse<StokHarian[]> & { pagination?: { page: number; limit: number; total: number } }> {
+        try {
+            const params = new URLSearchParams();
+            if (filters?.startDate) params.append('startDate', filters.startDate);
+            if (filters?.endDate) params.append('endDate', filters.endDate);
+            if (filters?.barangId) params.append('barangId', String(filters.barangId));
+            if (filters?.page) params.append('page', String(filters.page));
+            if (filters?.limit) params.append('limit', String(filters.limit));
+
+            const url = `${API_BASE_URL}/stok/histori${params.toString() ? `?${params.toString()}` : ''}`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: data.message || 'Gagal mendapatkan histori stok',
+                };
+            }
+
+            return {
+                success: true,
+                message: data.message || 'Berhasil mendapatkan histori stok',
+                data: data.data,
+                pagination: data.pagination,
+            };
+        } catch (error) {
+            console.error('Get histori stok error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
+    },
 };
 
 export default { barangService, stokService };
