@@ -10,7 +10,7 @@ interface props{
 const TitleAdd:React.FC<props> = ({title, navigateTo}) =>{
     const navigate = useNavigate();
     return(
-        <div className="flex flex-row justify-between items-center"><p className="font-semibold text-[1.25rem]">{title}</p> <button onClick={()=>navigate(`${navigateTo}`)} className="bg-[#B09331] rounded-lg p-1"><PlusIcon /></button></div>
+        <div className="flex flex-row gap-2 justify-between items-center"><p className="font-semibold text-[1.25rem]">{title}</p> <button onClick={()=>navigate(`${navigateTo}`)} className="bg-[#B09331] rounded-lg p-1"><PlusIcon /></button></div>
     )
 }
 

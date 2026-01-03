@@ -71,10 +71,47 @@ export class StokService {
     }
 
     /**
-     * Get histori stok
+     * Get histori stok dengan filter
      */
-    async getHistoriStok(page: number = 1, limit: number = 20) {
-        return stokRepository.findHistori(page, limit);
+    async getHistoriStok(options: {
+        page?: number;
+        limit?: number;
+        startDate?: string;
+        endDate?: string;
+        barangId?: number;
+    } = {}) {
+        const { page, limit, startDate, endDate, barangId } = options;
+
+        const result = await stokRepository.findHistori({
+            page,
+            limit,
+            startDate: startDate ? new Date(startDate) : undefined,
+            endDate: endDate ? new Date(endDate) : undefined,
+            barangId
+        });
+
+        // Calculate jumlah_ambil and jumlah_setor for each stok
+        const dataWithStats = result.data.map(stok => {
+            let jumlah_ambil = 0;
+            const uniqueSetorUsers = new Set<number>();
+
+            if ((stok as any).detailSetor) {
+                for (const detail of (stok as any).detailSetor) {
+                    jumlah_ambil += detail.qty;
+                    if (detail.tanggalSetor) {
+                        uniqueSetorUsers.add(detail.ambilBarang.userId);
+                    }
+                }
+            }
+
+            return {
+                ...stok,
+                jumlah_ambil,
+                jumlah_setor: uniqueSetorUsers.size,
+            };
+        });
+
+        return { data: dataWithStats, total: result.total };
     }
 
     /**

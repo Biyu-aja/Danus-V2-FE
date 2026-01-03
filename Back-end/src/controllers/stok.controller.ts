@@ -34,10 +34,19 @@ export const getStokHariIni = asyncHandler(async (req: Request, res: Response) =
  * Get histori stok
  */
 export const getHistoriStok = asyncHandler(async (req: Request, res: Response) => {
-    const query = req.query as PaginationQuery;
-    const page = parseInt(query.page || '1', 10);
-    const limit = parseInt(query.limit || '20', 10);
+    const { page, limit, startDate, endDate, barangId } = req.query;
 
-    const result = await stokService.getHistoriStok(page, limit);
-    return paginatedResponse(res, result.data, { page, limit, total: result.total }, 'Berhasil mendapatkan histori stok');
+    const result = await stokService.getHistoriStok({
+        page: page ? parseInt(page as string, 10) : undefined,
+        limit: limit ? parseInt(limit as string, 10) : undefined,
+        startDate: startDate as string | undefined,
+        endDate: endDate as string | undefined,
+        barangId: barangId ? parseInt(barangId as string, 10) : undefined,
+    });
+
+    return paginatedResponse(res, result.data, {
+        page: page ? parseInt(page as string, 10) : 1,
+        limit: limit ? parseInt(limit as string, 10) : 50,
+        total: result.total
+    }, 'Berhasil mendapatkan histori stok');
 });

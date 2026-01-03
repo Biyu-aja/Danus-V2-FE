@@ -7,6 +7,7 @@ import KelolaBarang from "../pages/Admin/MAIN-PAGE/kelola-barang";
 import TambahBarangPage from "../pages/Admin/Kelola-Barang-Page/tambah-barang";
 import TambahStokPage from "../pages/Admin/Kelola-Barang-Page/tambah-stok";
 import StatusUserPage from "../pages/Admin/MAIN-PAGE/status-user";
+import HistoriStokPage from "../pages/Admin/MAIN-PAGE/histori-stok";
 import UserDashboard from "../pages/User/dashboard";
 import AmbilStokPage from "../pages/User/ambil-stok";
 import RiwayatPage from "../pages/User/riwayat";
@@ -40,6 +41,10 @@ const Routes = createBrowserRouter([
     {
         path: "/admin/kelola-barang/tambah-stok",
         element : <TambahStokPage />
+    },
+    {
+        path: "/admin/histori-stok",
+        element: <HistoriStokPage />
     },
     {
         path: "/admin/kelola-user",
