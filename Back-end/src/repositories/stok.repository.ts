@@ -144,6 +144,34 @@ export class StokRepository {
     }
 
     /**
+     * Get stok by ID with detail users (who took/deposited)
+     */
+    async findByIdWithUsers(id: number) {
+        return prisma.stokHarian.findUnique({
+            where: { id },
+            include: {
+                barang: true,
+                detailSetor: {
+                    include: {
+                        ambilBarang: {
+                            include: {
+                                user: {
+                                    select: {
+                                        id: true,
+                                        nama_lengkap: true,
+                                        username: true,
+                                        role: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+        });
+    }
+
+    /**
      * Update stok (kurangi qty) - dalam transaction
      */
     async decrementStok(tx: TransactionClient, id: number, qty: number) {

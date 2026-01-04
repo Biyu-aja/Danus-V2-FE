@@ -8,6 +8,7 @@ import {
     AlertCircle
 } from "lucide-react";
 import { keuanganService } from "../../../services/keuangan.service";
+import { formatNominal } from "../../../helper/formatnominal";
 
 interface TambahTransaksiModalProps {
     isOpen: boolean;
@@ -84,10 +85,7 @@ const TambahTransaksiModal: React.FC<TambahTransaksiModalProps> = ({
         }
     };
 
-    const formatNominal = (value: string) => {
-        const num = value.replace(/\D/g, '');
-        return num ? new Intl.NumberFormat('id-ID').format(parseInt(num)) : '';
-    };
+
 
     if (!isOpen) return null;
 
@@ -158,7 +156,7 @@ const TambahTransaksiModal: React.FC<TambahTransaksiModalProps> = ({
 
                             {/* Title */}
                             <div>
-                                <label className="text-[#888] text-sm block mb-2">Judul Transaksi *</label>
+                                <label className="text-[#888] text-sm gap-1 flex items-center mb-2">Judul Transaksi <p className="text-red-500">*</p></label>
                                 <input
                                     type="text"
                                     value={title}
@@ -170,7 +168,7 @@ const TambahTransaksiModal: React.FC<TambahTransaksiModalProps> = ({
 
                             {/* Nominal */}
                             <div>
-                                <label className="text-[#888] text-sm block mb-2">Nominal *</label>
+                                <label className="text-[#888] text-sm gap-1 flex items-center mb-2">Nominal <p className="text-red-500">*</p></label>
                                 <div className="relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#888]">Rp</span>
                                     <input

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../../components/general/header";
 import Navbar from "../../../components/admin/general-admin/navbar";
 import StokCard from "../../../components/general/stokcard";
-import DetailStokModal from "../../../components/admin/kelola-barang/detail-stok-modal";
 import { 
     Loader2, 
     History,
@@ -18,11 +18,10 @@ import type { StokHarian, Barang } from "../../../types/barang.types";
 type FilterMode = 'custom' | 'minggu' | 'bulan' | 'semua';
 
 const HistoriStokPage: React.FC = () => {
+    const navigate = useNavigate();
     const [stokList, setStokList] = useState<StokHarian[]>([]);
     const [barangList, setBarangList] = useState<Barang[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedStok, setSelectedStok] = useState<StokHarian | null>(null);
-    const [showDetailModal, setShowDetailModal] = useState(false);
     
     // Filter states
     const [filterMode, setFilterMode] = useState<FilterMode>('semua');
@@ -284,10 +283,7 @@ const HistoriStokPage: React.FC = () => {
                                     {items.map((stok) => (
                                         <div 
                                             key={stok.id} 
-                                            onClick={() => {
-                                                setSelectedStok(stok);
-                                                setShowDetailModal(true);
-                                            }}
+                                            onClick={() => navigate(`/admin/histori-stok/${stok.id}`)}
                                             className="cursor-pointer"
                                         >
                                             <StokCard
@@ -311,16 +307,6 @@ const HistoriStokPage: React.FC = () => {
             </main>
 
             <Navbar />
-
-            {/* Detail Modal */}
-            <DetailStokModal
-                stok={selectedStok}
-                isOpen={showDetailModal}
-                onClose={() => {
-                    setShowDetailModal(false);
-                    setSelectedStok(null);
-                }}
-            />
         </div>
     );
 };

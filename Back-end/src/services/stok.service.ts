@@ -170,6 +170,80 @@ export class StokService {
     }
 
     /**
+     * Get stok by ID with user details (who took/deposited)
+     */
+    async getStokByIdWithUsers(id: number) {
+        const stok = await stokRepository.findByIdWithUsers(id);
+
+        if (!stok) {
+            throw new NotFoundError(`Stok dengan ID ${id} tidak ditemukan`);
+        }
+
+        // Calculate stats and group users
+        let jumlah_ambil = 0;
+        const uniqueSetorUsers = new Set<number>();
+
+        // Group by user with their transactions
+        const userTransactions: {
+            [userId: number]: {
+                user: { id: number; nama_lengkap: string; username: string; role: string };
+                items: {
+                    id: number;
+                    qty: number;
+                    totalHarga: number;
+                    status: 'ambil' | 'setor';
+                    tanggalAmbil: Date;
+                    tanggalSetor: Date | null;
+                }[];
+                totalAmbil: number;
+                totalSetor: number;
+            }
+        } = {};
+
+        if ((stok as any).detailSetor) {
+            for (const detail of (stok as any).detailSetor) {
+                jumlah_ambil += detail.qty;
+
+                const userId = detail.ambilBarang.user.id;
+
+                if (!userTransactions[userId]) {
+                    userTransactions[userId] = {
+                        user: detail.ambilBarang.user,
+                        items: [],
+                        totalAmbil: 0,
+                        totalSetor: 0,
+                    };
+                }
+
+                userTransactions[userId].items.push({
+                    id: detail.id,
+                    qty: detail.qty,
+                    totalHarga: detail.totalHarga,
+                    status: detail.tanggalSetor ? 'setor' : 'ambil',
+                    tanggalAmbil: detail.ambilBarang.tanggalAmbil,
+                    tanggalSetor: detail.tanggalSetor,
+                });
+
+                userTransactions[userId].totalAmbil += detail.qty;
+                if (detail.tanggalSetor) {
+                    userTransactions[userId].totalSetor += detail.qty;
+                    uniqueSetorUsers.add(userId);
+                }
+            }
+        }
+
+        // Convert to array
+        const users = Object.values(userTransactions);
+
+        return {
+            ...stok,
+            jumlah_ambil,
+            jumlah_setor: uniqueSetorUsers.size,
+            users,
+        };
+    }
+
+    /**
      * Update stok harian
      * - Jika modal berubah, adjust saldo sesuai selisih
      */

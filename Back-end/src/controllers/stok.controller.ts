@@ -79,3 +79,17 @@ export const deleteStokHarian = asyncHandler(async (req: Request, res: Response)
     const result = await stokService.deleteStokHarian(id);
     return successResponse(res, result, 'Berhasil menghapus stok harian');
 });
+
+/**
+ * GET /api/stok/:id/detail
+ * Get stok detail with users
+ */
+export const getStokDetail = asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+        throw new ValidationError('ID stok tidak valid');
+    }
+
+    const result = await stokService.getStokByIdWithUsers(id);
+    return successResponse(res, result, 'Berhasil mendapatkan detail stok');
+});

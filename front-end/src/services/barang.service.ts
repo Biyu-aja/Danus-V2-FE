@@ -351,6 +351,41 @@ export const stokService = {
             };
         }
     },
+
+    /**
+     * Get stok detail with users
+     */
+    async getStokDetail(id: number): Promise<ApiResponse<StokHarian & { users: any[] }>> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/stok/${id}/detail`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const resData = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: resData.message || 'Gagal mendapatkan detail stok',
+                };
+            }
+
+            return {
+                success: true,
+                message: resData.message || 'Berhasil mendapatkan detail stok',
+                data: resData.data,
+            };
+        } catch (error) {
+            console.error('Get stok detail error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
+    },
 };
 
 export default { barangService, stokService };
