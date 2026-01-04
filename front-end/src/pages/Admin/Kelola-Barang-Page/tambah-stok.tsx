@@ -6,6 +6,7 @@ import { barangService, stokService } from "../../../services/barang.service";
 import type { Barang } from "../../../types/barang.types";
 import { useNavigate } from "react-router-dom";
 import { Loader2, CheckCircle, AlertCircle, Boxes, Calendar } from "lucide-react";
+import { formatNominal } from "../../../helper/formatnominal";
 
 const TambahStokPage: React.FC = () => {
     const navigate = useNavigate();
@@ -213,8 +214,8 @@ const TambahStokPage: React.FC = () => {
                             label="Jumlah Stok" 
                             placeholder="Contoh: 50" 
                             isImportant 
-                            value={jumlahStok}
-                            setValue={(v) => setJumlahStok(formatRupiah(v))}
+                            value={formatNominal(jumlahStok)}
+                            setValue={(v) => setJumlahStok(formatNominal(v))}
                         />
 
                         {/* Harga Jual */}
@@ -227,8 +228,8 @@ const TambahStokPage: React.FC = () => {
                                 <div className="px-3 text-[#888] border-r border-[#4f4f4f]">Rp</div>
                                 <input 
                                     type="text"
-                                    value={hargaJual}
-                                    onChange={(e) => setHargaJual(formatRupiah(e.target.value))}
+                                    value={formatNominal(hargaJual)}
+                                    onChange={(e) => setHargaJual(formatNominal(e.target.value))}
                                     className="w-full p-2 bg-[#1e1e1e] rounded-r-lg outline-none"
                                     placeholder="5000"
                                 />
@@ -245,8 +246,8 @@ const TambahStokPage: React.FC = () => {
                                 <div className="px-3 text-[#888] border-r border-[#4f4f4f]">Rp</div>
                                 <input 
                                     type="text"
-                                    value={modal}
-                                    onChange={(e) => setModal(formatRupiah(e.target.value))}
+                                    value={formatNominal(modal)}
+                                    onChange={(e) => setModal(formatNominal(e.target.value))}
                                     className="w-full p-2 bg-[#1e1e1e] rounded-r-lg outline-none"
                                     placeholder="150000"
                                 />

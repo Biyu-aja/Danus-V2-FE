@@ -4,7 +4,8 @@ import {
     getStokHariIni,
     getHistoriStok,
     updateStokHarian,
-    deleteStokHarian
+    deleteStokHarian,
+    getStokDetail
 } from '../controllers/stok.controller';
 
 const router = Router();
@@ -26,6 +27,12 @@ router.get('/hari-ini', getStokHariIni);
  * @desc Get histori stok
  */
 router.get('/histori', getHistoriStok);
+
+/**
+ * @route GET /api/stok/:id/detail
+ * @desc Get stok detail with users
+ */
+router.get('/:id/detail', getStokDetail);
 
 /**
  * @route PUT /api/stok/:id

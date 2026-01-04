@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
     X, 
     BoxIcon, 
@@ -10,11 +10,29 @@ import {
     Trash2,
     Loader2,
     AlertCircle,
-    Edit3
+    Edit3,
+    User,
+    CheckCircle,
+    Clock,
+    Users
 } from "lucide-react";
 import type { StokHarian } from "../../../types/barang.types";
 import { stokService } from "../../../services/barang.service";
 import EditStokModal from "./edit-stok-modal";
+
+interface UserTransaction {
+    user: { id: number; nama_lengkap: string; username: string; role: string };
+    items: {
+        id: number;
+        qty: number;
+        totalHarga: number;
+        status: 'ambil' | 'setor';
+        tanggalAmbil: string;
+        tanggalSetor: string | null;
+    }[];
+    totalAmbil: number;
+    totalSetor: number;
+}
 
 interface DetailStokModalProps {
     stok: StokHarian | null;
@@ -35,6 +53,31 @@ const DetailStokModal: React.FC<DetailStokModalProps> = ({
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
+    const [loadingUsers, setLoadingUsers] = useState(false);
+    const [users, setUsers] = useState<UserTransaction[]>([]);
+    const [showUsers, setShowUsers] = useState(false);
+
+    // Fetch user details when modal opens
+    useEffect(() => {
+        if (isOpen && stok && showUsers) {
+            fetchUserDetails();
+        }
+    }, [isOpen, stok?.id, showUsers]);
+
+    const fetchUserDetails = async () => {
+        if (!stok) return;
+        setLoadingUsers(true);
+        try {
+            const response = await stokService.getStokDetail(stok.id);
+            if (response.success && response.data) {
+                setUsers(response.data.users || []);
+            }
+        } catch (err) {
+            console.error('Error fetching user details:', err);
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
 
     if (!isOpen || !stok) return null;
 
@@ -48,6 +91,13 @@ const DetailStokModal: React.FC<DetailStokModalProps> = ({
             day: 'numeric',
             month: 'long',
             year: 'numeric',
+        });
+    };
+
+    const formatTime = (dateString: string) => {
+        return new Date(dateString).toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
         });
     };
 
@@ -88,11 +138,11 @@ const DetailStokModal: React.FC<DetailStokModalProps> = ({
                 onClick={onClose}
             >
                 <div 
-                    className="bg-[#1e1e1e] w-full max-w-md rounded-2xl overflow-hidden shadow-xl border border-[#333]"
+                    className="bg-[#1e1e1e] w-full max-w-md max-h-[90vh] rounded-2xl overflow-hidden shadow-xl border border-[#333] flex flex-col"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header with Image */}
-                    <div className="relative h-40">
+                    <div className="relative h-32 flex-shrink-0">
                         {stok.barang?.gambar ? (
                             <img 
                                 src={stok.barang.gambar} 
@@ -101,7 +151,7 @@ const DetailStokModal: React.FC<DetailStokModalProps> = ({
                             />
                         ) : (
                             <div className="w-full h-full bg-gradient-to-br from-[#3B82F6] to-[#1E40AF] flex items-center justify-center">
-                                <BoxIcon className="w-16 h-16 text-white/30" />
+                                <BoxIcon className="w-12 h-12 text-white/30" />
                             </div>
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
@@ -116,13 +166,13 @@ const DetailStokModal: React.FC<DetailStokModalProps> = ({
 
                         {/* Title */}
                         <div className="absolute bottom-0 left-0 right-0 p-4">
-                            <h2 className="text-white text-xl font-bold">{stok.barang?.nama || 'Unknown'}</h2>
-                            <p className="text-[#B09331] font-semibold">Rp {formatRupiah(stok.harga)}</p>
+                            <h2 className="text-white text-lg font-bold">{stok.barang?.nama || 'Unknown'}</h2>
+                            <p className="text-[#B09331] font-semibold text-sm">Rp {formatRupiah(stok.harga)}</p>
                         </div>
                     </div>
 
-                    {/* Content */}
-                    <div className="p-4 space-y-4">
+                    {/* Scrollable Content */}
+                    <div className="p-4 space-y-4 overflow-y-auto flex-1">
                         {/* Delete Confirmation */}
                         {showDeleteConfirm ? (
                             <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 space-y-3">
@@ -171,34 +221,34 @@ const DetailStokModal: React.FC<DetailStokModalProps> = ({
                         ) : (
                             <>
                                 {/* Stats Grid */}
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-2 gap-2">
                                     <div className="bg-[#252525] rounded-xl p-3">
                                         <div className="flex items-center gap-2 mb-1">
                                             <BoxIcon className="w-4 h-4 text-blue-400" />
                                             <span className="text-[#888] text-xs">Stok Tersisa</span>
                                         </div>
-                                        <p className="text-white text-xl font-bold">{stok.stok}</p>
+                                        <p className="text-white text-lg font-bold">{stok.stok}</p>
                                     </div>
                                     <div className="bg-[#252525] rounded-xl p-3">
                                         <div className="flex items-center gap-2 mb-1">
                                             <Wallet className="w-4 h-4 text-green-400" />
                                             <span className="text-[#888] text-xs">Modal</span>
                                         </div>
-                                        <p className="text-white text-xl font-bold">Rp {formatRupiah(stok.modal)}</p>
+                                        <p className="text-white text-lg font-bold">Rp {formatRupiah(stok.modal)}</p>
                                     </div>
                                     <div className="bg-[#252525] rounded-xl p-3">
                                         <div className="flex items-center gap-2 mb-1">
                                             <HandHelping className="w-4 h-4 text-yellow-400" />
                                             <span className="text-[#888] text-xs">Jumlah Ambil</span>
                                         </div>
-                                        <p className="text-white text-xl font-bold">{stok.jumlah_ambil || 0}</p>
+                                        <p className="text-white text-lg font-bold">{stok.jumlah_ambil || 0}</p>
                                     </div>
                                     <div className="bg-[#252525] rounded-xl p-3">
                                         <div className="flex items-center gap-2 mb-1">
                                             <HandCoins className="w-4 h-4 text-purple-400" />
-                                            <span className="text-[#888] text-xs">Jumlah Setor</span>
+                                            <span className="text-[#888] text-xs">User Setor</span>
                                         </div>
-                                        <p className="text-white text-xl font-bold">{stok.jumlah_setor || 0}</p>
+                                        <p className="text-white text-lg font-bold">{stok.jumlah_setor || 0}</p>
                                     </div>
                                 </div>
 
@@ -230,6 +280,81 @@ const DetailStokModal: React.FC<DetailStokModalProps> = ({
                                         <p className="text-white text-sm">{stok.keterangan}</p>
                                     </div>
                                 )}
+
+                                {/* Users Section */}
+                                <div className="bg-[#252525] rounded-xl overflow-hidden">
+                                    <button
+                                        onClick={() => setShowUsers(!showUsers)}
+                                        className="w-full flex items-center justify-between p-3 hover:bg-[#2a2a2a] transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Users className="w-4 h-4 text-[#B09331]" />
+                                            <span className="text-white font-medium text-sm">User yang Mengambil</span>
+                                        </div>
+                                        <span className="text-[#888] text-xs">
+                                            {showUsers ? 'Tutup' : 'Lihat'}
+                                        </span>
+                                    </button>
+
+                                    {showUsers && (
+                                        <div className="border-t border-[#333] p-3">
+                                            {loadingUsers ? (
+                                                <div className="flex items-center justify-center py-4">
+                                                    <Loader2 className="w-5 h-5 animate-spin text-[#B09331]" />
+                                                </div>
+                                            ) : users.length === 0 ? (
+                                                <p className="text-[#888] text-sm text-center py-2">
+                                                    Belum ada yang mengambil
+                                                </p>
+                                            ) : (
+                                                <div className="space-y-3">
+                                                    {users.map(ut => (
+                                                        <div key={ut.user.id} className="bg-[#1e1e1e] rounded-lg p-3">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <div className="w-8 h-8 rounded-full bg-[#B09331]/20 flex items-center justify-center">
+                                                                    <User className="w-4 h-4 text-[#B09331]" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-white font-medium text-sm">{ut.user.nama_lengkap}</p>
+                                                                    <p className="text-[#888] text-xs">@{ut.user.username}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex gap-4 text-xs">
+                                                                <div className="flex items-center gap-1">
+                                                                    <Clock className="w-3 h-3 text-yellow-400" />
+                                                                    <span className="text-[#888]">Ambil: </span>
+                                                                    <span className="text-white font-medium">{ut.totalAmbil}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1">
+                                                                    <CheckCircle className="w-3 h-3 text-green-400" />
+                                                                    <span className="text-[#888]">Setor: </span>
+                                                                    <span className="text-white font-medium">{ut.totalSetor}</span>
+                                                                </div>
+                                                            </div>
+                                                            {ut.items.length > 0 && (
+                                                                <div className="mt-2 space-y-1">
+                                                                    {ut.items.map(item => (
+                                                                        <div 
+                                                                            key={item.id}
+                                                                            className={`text-xs px-2 py-1 rounded flex justify-between ${
+                                                                                item.status === 'setor' 
+                                                                                    ? 'bg-green-500/10 text-green-400' 
+                                                                                    : 'bg-yellow-500/10 text-yellow-400'
+                                                                            }`}
+                                                                        >
+                                                                            <span>{item.qty}x @ Rp {formatRupiah(item.totalHarga / item.qty)}</span>
+                                                                            <span>{item.status === 'setor' ? '✓ Setor' : '⏳ Belum'}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Actions */}
                                 <div className="flex gap-2 pt-2">
