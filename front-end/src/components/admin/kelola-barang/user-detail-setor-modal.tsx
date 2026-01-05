@@ -23,6 +23,7 @@ interface UserDetailSetorModalProps {
     onSuccess: () => void;
     userId: number;
     userName: string;
+    date?: Date; // Optional date property
 }
 
 interface SelectedItemSetor {
@@ -36,7 +37,8 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
     onClose, 
     onSuccess,
     userId,
-    userName 
+    userName,
+    date
 }) => {
     const [ambilBarangList, setAmbilBarangList] = useState<AmbilBarang[]>([]);
     const [admins, setAdmins] = useState<UserType[]>([]);
@@ -57,7 +59,7 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
             setError(null);
             setSuccess(false);
         }
-    }, [isOpen, userId]);
+    }, [isOpen, userId, date]); // Add date to dependency
 
     const fetchData = async () => {
         setLoading(true);
@@ -65,20 +67,16 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
             // Fetch user's ambil barang
             const response = await ambilBarangService.getAmbilBarangByUserId(userId);
             if (response.success && response.data) {
-                // Filter only today's records (optional, depending on requirement)
-                // Assuming we want to show all pending
-                // But user requested "Status User Hari Ini", so let's stick to today or filter by logic
-                
-                // Let's allow all pending items to be shown, grouped by date maybe?
-                // For simplicity matching current UI, let's show all pending/deposited for TODAY
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const todayData = response.data.filter(ab => {
+                // Use provided date or default to Today
+                const targetDate = date ? new Date(date) : new Date();
+                targetDate.setHours(0, 0, 0, 0);
+
+                const filteredData = response.data.filter(ab => {
                     const ambilDate = new Date(ab.tanggalAmbil);
                     ambilDate.setHours(0, 0, 0, 0);
-                    return ambilDate.getTime() === today.getTime();
+                    return ambilDate.getTime() === targetDate.getTime();
                 });
-                setAmbilBarangList(todayData);
+                setAmbilBarangList(filteredData);
             }
 
             // Fetch admins for dropdown
@@ -231,7 +229,7 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                         <User className="w-5 h-5 text-[#B09331]" />
                         <div>
                             <h2 className="text-white font-bold text-lg">{userName}</h2>
-                            <p className="text-[#888] text-xs">Detail Pengambilan Hari Ini</p>
+                            <p className="text-[#888] text-xs">{date ? date.toDateString() : 'Detail Pengambilan Hari Ini'}</p>
                         </div>
                     </div>
                     <button 

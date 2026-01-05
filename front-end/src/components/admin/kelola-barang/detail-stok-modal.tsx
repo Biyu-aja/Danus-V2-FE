@@ -14,11 +14,14 @@ import {
     User,
     CheckCircle,
     Clock,
-    Users
+    Users,
+    Calendar1Icon,
+    ArrowRight
 } from "lucide-react";
 import type { StokHarian } from "../../../types/barang.types";
 import { stokService } from "../../../services/barang.service";
 import EditStokModal from "./edit-stok-modal";
+import { useNavigate } from "react-router-dom";
 
 interface UserTransaction {
     user: { id: number; nama_lengkap: string; username: string; role: string };
@@ -53,31 +56,8 @@ const DetailStokModal: React.FC<DetailStokModalProps> = ({
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
-    const [loadingUsers, setLoadingUsers] = useState(false);
-    const [users, setUsers] = useState<UserTransaction[]>([]);
-    const [showUsers, setShowUsers] = useState(false);
+    const navigate = useNavigate();
 
-    // Fetch user details when modal opens
-    useEffect(() => {
-        if (isOpen && stok && showUsers) {
-            fetchUserDetails();
-        }
-    }, [isOpen, stok?.id, showUsers]);
-
-    const fetchUserDetails = async () => {
-        if (!stok) return;
-        setLoadingUsers(true);
-        try {
-            const response = await stokService.getStokDetail(stok.id);
-            if (response.success && response.data) {
-                setUsers(response.data.users || []);
-            }
-        } catch (err) {
-            console.error('Error fetching user details:', err);
-        } finally {
-            setLoadingUsers(false);
-        }
-    };
 
     if (!isOpen || !stok) return null;
 
@@ -282,78 +262,17 @@ const DetailStokModal: React.FC<DetailStokModalProps> = ({
                                 )}
 
                                 {/* Users Section */}
-                                <div className="bg-[#252525] rounded-xl overflow-hidden">
+                                <div className="bg-[#B09331] rounded-xl overflow-hidden">
                                     <button
-                                        onClick={() => setShowUsers(!showUsers)}
-                                        className="w-full flex items-center justify-between p-3 hover:bg-[#2a2a2a] transition-colors"
+                                        onClick={() => navigate(`/admin/histori-stok/${stok.id}`)}
+                                        className="w-full flex items-center justify-between p-3 hover:bg-[#e2bd41] transition-colors"
                                     >
                                         <div className="flex items-center gap-2">
-                                            <Users className="w-4 h-4 text-[#B09331]" />
-                                            <span className="text-white font-medium text-sm">User yang Mengambil</span>
+                                            <Calendar1Icon className="w-4 h-4" />
+                                            <span className="text-white font-medium text-sm">Lihat Absensi</span>
                                         </div>
-                                        <span className="text-[#888] text-xs">
-                                            {showUsers ? 'Tutup' : 'Lihat'}
-                                        </span>
+                                        <ArrowRight className="w-4 h-4" />
                                     </button>
-
-                                    {showUsers && (
-                                        <div className="border-t border-[#333] p-3">
-                                            {loadingUsers ? (
-                                                <div className="flex items-center justify-center py-4">
-                                                    <Loader2 className="w-5 h-5 animate-spin text-[#B09331]" />
-                                                </div>
-                                            ) : users.length === 0 ? (
-                                                <p className="text-[#888] text-sm text-center py-2">
-                                                    Belum ada yang mengambil
-                                                </p>
-                                            ) : (
-                                                <div className="space-y-3">
-                                                    {users.map(ut => (
-                                                        <div key={ut.user.id} className="bg-[#1e1e1e] rounded-lg p-3">
-                                                            <div className="flex items-center gap-2 mb-2">
-                                                                <div className="w-8 h-8 rounded-full bg-[#B09331]/20 flex items-center justify-center">
-                                                                    <User className="w-4 h-4 text-[#B09331]" />
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-white font-medium text-sm">{ut.user.nama_lengkap}</p>
-                                                                    <p className="text-[#888] text-xs">@{ut.user.username}</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex gap-4 text-xs">
-                                                                <div className="flex items-center gap-1">
-                                                                    <Clock className="w-3 h-3 text-yellow-400" />
-                                                                    <span className="text-[#888]">Ambil: </span>
-                                                                    <span className="text-white font-medium">{ut.totalAmbil}</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-1">
-                                                                    <CheckCircle className="w-3 h-3 text-green-400" />
-                                                                    <span className="text-[#888]">Setor: </span>
-                                                                    <span className="text-white font-medium">{ut.totalSetor}</span>
-                                                                </div>
-                                                            </div>
-                                                            {ut.items.length > 0 && (
-                                                                <div className="mt-2 space-y-1">
-                                                                    {ut.items.map(item => (
-                                                                        <div 
-                                                                            key={item.id}
-                                                                            className={`text-xs px-2 py-1 rounded flex justify-between ${
-                                                                                item.status === 'setor' 
-                                                                                    ? 'bg-green-500/10 text-green-400' 
-                                                                                    : 'bg-yellow-500/10 text-yellow-400'
-                                                                            }`}
-                                                                        >
-                                                                            <span>{item.qty}x @ Rp {formatRupiah(item.totalHarga / item.qty)}</span>
-                                                                            <span>{item.status === 'setor' ? '✓ Setor' : '⏳ Belum'}</span>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
                                 </div>
 
                                 {/* Actions */}

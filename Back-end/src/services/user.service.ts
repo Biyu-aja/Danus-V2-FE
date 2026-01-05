@@ -94,6 +94,92 @@ export class UserService {
             };
         });
     }
+
+    /**
+     * Get user statistics for a specific month
+     */
+    async getUserMonthlyStats(userId: number, year: number, month: number) {
+        const user = await userRepository.findById(userId);
+        if (!user) {
+            throw new NotFoundError(`User dengan ID ${userId} tidak ditemukan`);
+        }
+
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 1);
+
+        const transactions = await userRepository.findUserTransactionsInRange(userId, startDate, endDate);
+
+        // Prepare calendar data
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const calendar: { date: string; status: 'HIJAU' | 'KUNING' | 'MERAH' | 'ABU'; detail?: any }[] = [];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const currentDate = new Date(year, month - 1, day);
+            // Fix: Construct date string manually to avoid timezone shift from toISOString()
+            const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 6 = Saturday
+
+            let status: 'HIJAU' | 'KUNING' | 'MERAH' | 'ABU';
+
+            // Default to gray for weekends
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                status = 'ABU';
+            } else {
+                status = 'MERAH'; // Default to did not take
+            }
+
+            // Find transactions for this day
+            const dailyTx = transactions.filter(tx => {
+                const txDate = new Date(tx.tanggalAmbil);
+                return txDate.getDate() === day && txDate.getMonth() === month - 1 && txDate.getFullYear() === year;
+            });
+
+            if (dailyTx.length > 0) {
+                let totalAmbil = 0;
+                let totalSetor = 0;
+
+                for (const tx of dailyTx) {
+                    // Check details if available (assuming detailSetor exists based on previous simple types)
+                    // If complex detail logic is needed, we traverse detailSetor
+                    if (tx.detailSetor) {
+                        for (const detail of tx.detailSetor) {
+                            totalAmbil += detail.qty;
+                            if (detail.tanggalSetor) {
+                                totalSetor += detail.qty;
+                            }
+                        }
+                    }
+                }
+
+                if (totalAmbil > 0) {
+                    if (totalSetor >= totalAmbil) {
+                        status = 'HIJAU';
+                    } else {
+                        status = 'KUNING';
+                    }
+                }
+            }
+
+            calendar.push({
+                date: dateString,
+                status,
+                detail: dailyTx.length > 0 ? {
+                    count: dailyTx.length,
+                    totalAmbil,
+                    totalSetor
+                } : undefined
+            });
+        }
+
+        // Calculate summary stats
+        // Total transactions for ALL time could be fetched separately, 
+        // but for now let's return user info and this monthly calendar.
+
+        return {
+            user,
+            calendar
+        };
+    }
 }
 
 export const userService = new UserService();

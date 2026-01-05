@@ -64,8 +64,7 @@ const AdminAmbilBarangModal: React.FC<AdminAmbilBarangModalProps> = ({
             // Fetch users (non-admin)
             const usersResponse = await userService.getAllUsers();
             if (usersResponse.success && usersResponse.data) {
-                const nonAdminUsers = usersResponse.data.filter(u => u.role !== 'admin');
-                setUsers(nonAdminUsers);
+                setUsers(usersResponse.data);
             }
 
             // Fetch stok hari ini

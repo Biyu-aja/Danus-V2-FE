@@ -9,6 +9,7 @@ import TambahStokPage from "../pages/Admin/Kelola-Barang-Page/tambah-stok";
 import StatusUserPage from "../pages/Admin/MAIN-PAGE/status-user";
 import HistoriStokPage from "../pages/Admin/MAIN-PAGE/histori-stok";
 import HistoriStokDetailPage from "../pages/Admin/MAIN-PAGE/histori-stok-detail";
+import UserDetailStatsPage from "../pages/Admin/MAIN-PAGE/user-detail-stats";
 import UserDashboard from "../pages/User/dashboard";
 import AmbilStokPage from "../pages/User/ambil-stok";
 import RiwayatPage from "../pages/User/riwayat";
@@ -54,6 +55,10 @@ const Routes = createBrowserRouter([
     {
         path: "/admin/kelola-user",
         element : <KelolaUser />
+    },
+    {
+        path: "/admin/kelola-user/:id",
+        element: <UserDetailStatsPage />
     },
     {
         path: "/admin/status-user",

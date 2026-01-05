@@ -228,8 +228,8 @@ const TambahStokPage: React.FC = () => {
                                 <div className="px-3 text-[#888] border-r border-[#4f4f4f]">Rp</div>
                                 <input 
                                     type="text"
-                                    value={formatNominal(hargaJual)}
-                                    onChange={(e) => setHargaJual(formatNominal(e.target.value))}
+                                    value={formatRupiah(hargaJual)}
+                                    onChange={(e) => setHargaJual(formatRupiah(e.target.value))}
                                     className="w-full p-2 bg-[#1e1e1e] rounded-r-lg outline-none"
                                     placeholder="5000"
                                 />
@@ -246,8 +246,8 @@ const TambahStokPage: React.FC = () => {
                                 <div className="px-3 text-[#888] border-r border-[#4f4f4f]">Rp</div>
                                 <input 
                                     type="text"
-                                    value={formatNominal(modal)}
-                                    onChange={(e) => setModal(formatNominal(e.target.value))}
+                                    value={formatRupiah(modal)}
+                                    onChange={(e) => setModal(formatRupiah(e.target.value))}
                                     className="w-full p-2 bg-[#1e1e1e] rounded-r-lg outline-none"
                                     placeholder="150000"
                                 />

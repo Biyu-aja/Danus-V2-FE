@@ -62,6 +62,25 @@ export class UserRepository {
     }
 
     /**
+     * Get user transaction within date range
+     */
+    async findUserTransactionsInRange(userId: number, startDate: Date, endDate: Date) {
+        return prisma.ambilBarang.findMany({
+            where: {
+                userId,
+                tanggalAmbil: {
+                    gte: startDate,
+                    lt: endDate,
+                },
+            },
+            include: {
+                detailSetor: true,
+            },
+            orderBy: { tanggalAmbil: 'asc' },
+        });
+    }
+
+    /**
      * Get all users with today's ambil barang status
      */
     async findAllWithTodayStatus() {
@@ -71,9 +90,7 @@ export class UserRepository {
         tomorrow.setDate(tomorrow.getDate() + 1);
 
         return prisma.user.findMany({
-            where: {
-                role: 'user', // Only get users, not admin
-            },
+            // Removed role filter to include admins
             select: {
                 id: true,
                 nama_lengkap: true,
