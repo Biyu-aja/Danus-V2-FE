@@ -1,62 +1,118 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../../components/general/header";
 import Navbar from "../../../components/admin/general-admin/navbar";
-import SearchBar from "../../../components/general/searchbar";
-import CardUser from "../../../components/admin/kelola-user/carduser";
-import DetailUser from "../../../components/admin/kelola-user/detailuser";
 
-const KelolaUser:React.FC = () => {
+import CardUser from "../../../components/admin/kelola-user/carduser";
+import { userService, type UserWithStatus } from "../../../services/user.service";
+import { Loader2, Users } from "lucide-react";
+
+const KelolaUser: React.FC = () => {
+    const navigate = useNavigate();
     const dropdown = ([
         {value: "alfabet", Menu: "Alfabet"},
-        {value: "jumlah-ambil", Menu: "Jumlah Ambil"},
+        {value: "jumlah-ambil", Menu: "Jumlah Ambil (Tinggi ke Rendah)"},
         {value: "sudah-setor", Menu: "Sudah Setor"},
-        {value: "sudah-ambil", Menu: "Sudah Ambil"},
         {value: "belum-ambil", Menu: "Belum Ambil"},
-    ])
+        {value: "belum-setor", Menu: "Belum Setor"},
+    ]);
 
-    const data = ([
-        {id: 1, nama: "Oguri Cap", status: "belum-ambil", jumlah_ambil:1023, catatan: "This guy eat to much bruh"},
-        {id: 2, nama: "Tokai Teio", status: "sudah-ambil", jumlah_ambil:512, catatan: "Fast learner and very active user."},
-        {id: 3, nama: "Mejiro McQueen", status: "sudah-setor", jumlah_ambil:256, catatan: "Reliable user with consistent activity."},
-    ])
+    const [users, setUsers] = useState<UserWithStatus[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [sortBy, setSortBy] = useState("alfabet");
 
-    const [selectedUser, setSelectedUser] = useState<any>(null);
-    const [showDetail, setShowDetail] = useState(false);
+    useEffect(() => {
+        fetchUsers();
+    }, []);
 
-    const handleCardClick = (data:any) => {
-        setSelectedUser(data);
-        setShowDetail(true);
-    }
-    return(
-        <div className="flex flex-col">
+    const fetchUsers = async () => {
+        setLoading(true);
+        try {
+            const response = await userService.getUsersWithTodayStatus();
+            if (response.success && response.data) {
+                setUsers(response.data);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCardClick = (id: number) => {
+        navigate(`/admin/kelola-user/${id}`);
+    };
+
+    const processedUsers = users.filter(user => 
+        user.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase())
+    ).sort((a, b) => {
+        switch (sortBy) {
+            case "alfabet":
+                return a.nama_lengkap.localeCompare(b.nama_lengkap);
+            case "jumlah-ambil":
+                return b.totalAmbil - a.totalAmbil;
+            case "sudah-setor":
+                return (a.status === 'SUDAH_SETOR' ? -1 : 1);
+            case "belum-ambil":
+                    return (a.status === 'BELUM_AMBIL' ? -1 : 1);
+            case "belum-setor":
+                return (a.status === 'BELUM_SETOR' ? -1 : 1);
+            default:
+                return 0;
+        }
+    });
+
+    return (
+        <div className="flex flex-col min-h-screen bg-[#121212]">
             <Header />
-                <main className="flex flex-col mt-[3.5rem] gap-3 p-3 mb-[3rem]">
-                    <SearchBar placeholder="Cari User"/>
-                    <div className="flex flex-row gap-2 items-center">
-                        <p className="text-[1.25rem] font-bold">Sort By</p>
-                        <select className="bg-[#1e1e1e] p-1 rounded-lg border border-[#4f4f4f]">
-                            {dropdown.map((data,index)=>(
-                                <option key={index} value={data.value}>{data.Menu}</option>
-                            ))}
-                        </select>
+            <main className="flex flex-col mt-[3.5rem] gap-3 p-3 mb-[5rem]">
+                <div className="flex items-center gap-2 mb-2">
+                    <Users className="w-6 h-6 text-[#B09331]" />
+                    <h1 className="text-white text-xl font-bold">Kelola User</h1>
+                </div>
+
+                <div className="flex gap-2">
+                    <input 
+                        className="w-full bg-[#1e1e1e] border border-[#333] rounded-xl px-4 py-2 text-white placeholder-[#666] focus:border-[#B09331] focus:outline-none"
+                        placeholder="Cari user..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+
+                <div className="flex flex-row gap-2 items-center">
+                    <p className="text-[1rem] font-medium text-[#888]">Urutkan:</p>
+                    <select 
+                        className="bg-[#1e1e1e] p-2 rounded-lg border border-[#333] text-white outline-none focus:border-[#B09331]"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                    >
+                        {dropdown.map((data, index) => (
+                            <option key={index} value={data.value}>{data.Menu}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {loading ? (
+                    <div className="flex items-center justify-center h-[20rem]">
+                        <Loader2 className="w-8 h-8 animate-spin text-[#888]" />
                     </div>
+                ) : (
                     <div className="flex flex-col gap-3">
-                        {data.map((user, index)=>(
-                            <div key={index} onClick={()=>handleCardClick(user)}>
-                                <CardUser nama={user.nama} status={user.status} jumlah_ambil={user.jumlah_ambil} />
+                        {processedUsers.map((user) => (
+                            <div key={user.id} onClick={() => handleCardClick(user.id)}>
+                                <CardUser 
+                                    user={user} 
+                                />
                             </div>
                         ))}
                     </div>
-                </main>
-                {
-                    showDetail && selectedUser && 
-                    <div className="bg-black/40 fixed inset-0 z-60 flex items-center justify-center" onClick={()=>setShowDetail(false)}>
-                        <DetailUser data={selectedUser} onclose={()=>setShowDetail(false)}/>
-                    </div>
-                }
+                )}
+            </main>
             <Navbar />
         </div>
-    )
-}
+    );
+};
 
-export default KelolaUser
+export default KelolaUser;

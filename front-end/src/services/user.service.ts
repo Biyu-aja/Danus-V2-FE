@@ -27,6 +27,21 @@ export interface UserWithStatus extends User {
     barangList: BarangItem[];
 }
 
+export interface CalendarDay {
+    date: string;
+    status: 'HIJAU' | 'KUNING' | 'MERAH' | 'ABU';
+    detail?: {
+        count: number;
+        totalAmbil: number;
+        totalSetor: number;
+    };
+}
+
+export interface UserStats {
+    user: User;
+    calendar: CalendarDay[];
+}
+
 /**
  * User Service
  */
@@ -135,6 +150,41 @@ export const userService = {
             };
         }
     },
+
+    /**
+     * Get user monthly stats
+     */
+    async getUserMonthlyStats(id: number, year: number, month: number): Promise<ApiResponse<UserStats>> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/${id}/stats?year=${year}&month=${month}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: data.message || 'Gagal mendapatkan data statistik user',
+                };
+            }
+
+            return {
+                success: true,
+                message: data.message || 'Berhasil mendapatkan data statistik user',
+                data: data.data,
+            };
+        } catch (error) {
+            console.error('Get user stats error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
+    }
 };
 
 export default userService;
