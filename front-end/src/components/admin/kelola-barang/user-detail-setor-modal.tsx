@@ -12,10 +12,15 @@ import {
     XCircle,
     Minus,
     Plus,
-    ChevronDown
+    ChevronDown,
+    CalendarIcon,
+    PhoneIcon,
+    NotebookIcon,
+    Save
 } from "lucide-react";
 import { ambilBarangService, type AmbilBarang, type DetailSetor } from "../../../services/ambilBarang.service";
 import { userService, type User as UserType } from "../../../services/user.service";
+import { FaWhatsapp } from "react-icons/fa6";
 
 interface UserDetailSetorModalProps {
     isOpen: boolean;
@@ -42,6 +47,7 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
 }) => {
     const [ambilBarangList, setAmbilBarangList] = useState<AmbilBarang[]>([]);
     const [admins, setAdmins] = useState<UserType[]>([]);
+    const [userData, setUserData] = useState<UserType | null>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -50,6 +56,12 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
     // Track selected items for setor
     const [selectedItems, setSelectedItems] = useState<SelectedItemSetor[]>([]);
     const [selectedAdminId, setSelectedAdminId] = useState<number>(1); // Default 1 (will be updated)
+    
+    // Note state
+    const [showNoteInput, setShowNoteInput] = useState(false);
+    const [note, setNote] = useState<string>("");
+    const [originalNote, setOriginalNote] = useState<string>("");
+    const [savingNote, setSavingNote] = useState(false);
 
     // Fetch data when modal opens
     useEffect(() => {
@@ -58,12 +70,21 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
             setSelectedItems([]);
             setError(null);
             setSuccess(false);
+            setShowNoteInput(false);
+            setNote("");
+            setOriginalNote("");
         }
     }, [isOpen, userId, date]); // Add date to dependency
 
     const fetchData = async () => {
         setLoading(true);
         try {
+            // Fetch user data
+            const userResponse = await userService.getUserById(userId);
+            if (userResponse.success && userResponse.data) {
+                setUserData(userResponse.data);
+            }
+
             // Fetch user's ambil barang
             const response = await ambilBarangService.getAmbilBarangByUserId(userId);
             if (response.success && response.data) {
@@ -77,6 +98,13 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                     return ambilDate.getTime() === targetDate.getTime();
                 });
                 setAmbilBarangList(filteredData);
+                
+                // Load existing keterangan from first AmbilBarang
+                if (filteredData.length > 0 && filteredData[0].keterangan) {
+                    setNote(filteredData[0].keterangan);
+                    setOriginalNote(filteredData[0].keterangan);
+                    setShowNoteInput(true);
+                }
             }
 
             // Fetch admins for dropdown
@@ -212,6 +240,33 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
         }
     };
 
+    // Handle add note toggle
+    const handleAddNote = () => {
+        setShowNoteInput(prev => !prev);
+    };
+
+    // Handle save note
+    const handleSaveNote = async () => {
+        if (ambilBarangList.length === 0) return;
+        
+        setSavingNote(true);
+        try {
+            // Save note to all AmbilBarang for this user on this date
+            const promises = ambilBarangList.map(ab => 
+                ambilBarangService.updateKeterangan(ab.id, note)
+            );
+            
+            await Promise.all(promises);
+            setOriginalNote(note);
+            setError(null);
+        } catch (err) {
+            console.error('Error saving note:', err);
+            setError('Gagal menyimpan catatan');
+        } finally {
+            setSavingNote(false);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -224,20 +279,33 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-[#333]">
-                    <div className="flex items-center gap-2">
-                        <User className="w-5 h-5 text-[#B09331]" />
-                        <div>
-                            <h2 className="text-white font-bold text-lg">{userName}</h2>
-                            <p className="text-[#888] text-xs">{date ? date.toDateString() : 'Detail Pengambilan Hari Ini'}</p>
+                <div className="flex flex-col gap-2 p-4 border-b border-[#333]">
+                    <div className="flex flex-row items-center gap-2 w-full justify-between">
+                        <div className="flex items-center gap-2">
+                            <NotebookIcon className="w-5 h-5 text-[#B09331]"/>
+                            <p className="text-white font-bold text-lg">Detail Absen Danus</p>
                         </div>
+                        <button 
+                            onClick={onClose}
+                            className="w-8 h-8 rounded-full bg-[#333] flex items-center justify-center text-[#888] hover:text-white hover:bg-[#444] transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
-                    <button 
-                        onClick={onClose}
-                        className="w-8 h-8 rounded-full bg-[#333] flex items-center justify-center text-[#888] hover:text-white hover:bg-[#444] transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <User className="w-5 h-5 text-[#888]" />
+                        <h2 className="text-white text-md">{userData?.nama_lengkap}</h2>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <CalendarIcon className="w-4 h-4 text-[#888]" />
+                        <p className="text-[#888] text-md">{date ? date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Hari Ini'}</p> 
+                    </div>
+                    {userData?.nomor_telepon && (
+                        <div className="flex items-center gap-2">
+                            <PhoneIcon className="w-4 h-4 text-[#888]" />
+                            <p className="text-[#888] text-md">{userData.nomor_telepon}</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Content */}
@@ -428,15 +496,54 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                                     </div>
                                 </div>
                             )}
+
+                            {/* Note Input Section */}
+                            {showNoteInput && (
+                                <div className="bg-[#252525] p-3 rounded-xl border border-yellow-500/30">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label className="text-yellow-400 text-sm">Catatan</label>
+                                        {note !== originalNote && (
+                                            <span className="text-xs text-yellow-400/70">Belum disimpan</span>
+                                        )}
+                                    </div>
+                                    <textarea
+                                        value={note}
+                                        onChange={(e) => setNote(e.target.value)}
+                                        placeholder="Tulis catatan di sini..."
+                                        rows={3}
+                                        className="w-full bg-[#1e1e1e] text-white border border-[#333] rounded-lg p-3 resize-none focus:border-yellow-500 focus:outline-none placeholder-[#666]"
+                                    />
+                                    <button
+                                        onClick={handleSaveNote}
+                                        disabled={savingNote || note === originalNote}
+                                        className="mt-2 w-full bg-yellow-600 text-white font-semibold py-2 rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {savingNote ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Menyimpan...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="w-4 h-4" />
+                                                Simpan Catatan
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+
+
                         </>
                     )}
                 </div>
 
                 {/* Footer */}
-                {!loading && !success && pendingItems.length > 0 && (
-                    <div className="p-4 border-t border-[#333] bg-[#1a1a1a]">
-                        {selectedItems.length > 0 && (
-                            <div className="flex items-center justify-between mb-3">
+                {!loading && !success && (
+                    <div className="p-4 border-t border-[#333] bg-[#1a1a1a] space-y-3">
+                        {/* Selected Summary - only when pending items exist */}
+                        {pendingItems.length > 0 && selectedItems.length > 0 && (
+                            <div className="flex items-center justify-between">
                                 <span className="text-[#888]">
                                     {selectedItems.length} item terpilih
                                 </span>
@@ -445,23 +552,73 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                                 </span>
                             </div>
                         )}
-                        <button
-                            onClick={handleSetor}
-                            disabled={submitting || selectedItems.length === 0}
-                            className="w-full bg-green-600 text-white font-semibold py-3 rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                            {submitting ? (
+                        
+                        {/* Action Buttons */}
+                        <div className="flex gap-2">
+                            <a 
+                                href={userData?.nomor_telepon 
+                                    ? `https://wa.me/${userData.nomor_telepon.replace(/^0/, '62').replace(/[^0-9]/g, '')}`
+                                    : '#'
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                                    userData?.nomor_telepon 
+                                        ? 'bg-green-600 hover:bg-green-700 text-white cursor-pointer' 
+                                        : 'bg-[#333] text-[#666] cursor-not-allowed'
+                                }`}
+                                onClick={(e) => {
+                                    if (!userData?.nomor_telepon) {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                title={userData?.nomor_telepon ? `Chat WhatsApp: ${userData.nomor_telepon}` : 'Nomor telepon tidak tersedia'}
+                            >
+                                <FaWhatsapp className="w-5 h-5" />
+                            </a>
+                            
+                            {/* Show these buttons only when there are pending items */}
+                            {pendingItems.length > 0 ? (
                                 <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    Memproses...
+                                    <button 
+                                        className={`flex-1 font-medium py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm ${
+                                            showNoteInput 
+                                                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
+                                                : 'bg-[#333] text-white hover:bg-[#444] border border-[#444]'
+                                        }`}
+                                        onClick={handleAddNote}
+                                    >
+                                        <NotebookIcon className="w-4 h-4" />
+                                        {showNoteInput ? 'Sembunyikan' : 'Lihat Catatan'}
+                                    </button>
+                                    <button
+                                        onClick={handleSetor}
+                                        disabled={submitting || selectedItems.length === 0}
+                                        className="flex-1 bg-[#B09331] text-white font-semibold py-3 rounded-xl hover:bg-[#C4A73B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                                    >
+                                        {submitting ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Memproses...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Check className="w-4 h-4" />
+                                                Konfirmasi Setor
+                                            </>
+                                        )}
+                                    </button>
                                 </>
                             ) : (
-                                <>
-                                    <Check className="w-5 h-5" />
-                                    Konfirmasi Setor
-                                </>
+                                /* When all items deposited, show close button */
+                                <button
+                                    onClick={onClose}
+                                    className="flex-1 bg-[#333] text-white font-semibold py-3 rounded-xl hover:bg-[#444] transition-colors flex items-center justify-center gap-2 text-sm"
+                                >
+                                    Tutup
+                                </button>
                             )}
-                        </button>
+                        </div>
                     </div>
                 )}
             </div>

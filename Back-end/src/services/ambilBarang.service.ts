@@ -107,6 +107,19 @@ export class AmbilBarangService {
 
         return ambilBarang;
     }
+
+    /**
+     * Update keterangan ambil barang
+     */
+    async updateKeterangan(id: number, keterangan: string) {
+        const ambilBarang = await ambilBarangRepository.findById(id);
+
+        if (!ambilBarang) {
+            throw new NotFoundError(`Ambil Barang dengan ID ${id} tidak ditemukan`);
+        }
+
+        return ambilBarangRepository.updateKeterangan(id, keterangan);
+    }
 }
 
 export const ambilBarangService = new AmbilBarangService();

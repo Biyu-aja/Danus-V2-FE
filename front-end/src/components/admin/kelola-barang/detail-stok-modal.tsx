@@ -264,7 +264,7 @@ const DetailStokModal: React.FC<DetailStokModalProps> = ({
                                 {/* Users Section */}
                                 <div className="bg-[#B09331] rounded-xl overflow-hidden">
                                     <button
-                                        onClick={() => navigate(`/admin/histori-stok/${stok.id}`)}
+                                        onClick={() => navigate(`/admin/detail-stok/${stok.id}`)}
                                         className="w-full flex items-center justify-between p-3 hover:bg-[#e2bd41] transition-colors"
                                     >
                                         <div className="flex items-center gap-2">

@@ -52,3 +52,15 @@ export const getAmbilBarangById = asyncHandler(async (req: Request, res: Respons
     const ambilBarang = await ambilBarangService.getAmbilBarangById(id);
     return successResponse(res, ambilBarang, 'Berhasil mendapatkan data ambil barang');
 });
+
+/**
+ * PATCH /api/ambil-barang/:id/keterangan
+ * Update keterangan ambil barang
+ */
+export const updateKeterangan = asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    const { keterangan } = req.body;
+
+    const ambilBarang = await ambilBarangService.updateKeterangan(id, keterangan || '');
+    return successResponse(res, ambilBarang, 'Berhasil mengupdate keterangan');
+});

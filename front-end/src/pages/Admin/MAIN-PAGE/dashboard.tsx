@@ -4,7 +4,17 @@ import Header from "../../../components/general/header";
 import Navbar from "../../../components/admin/general-admin/navbar";
 import Total_Saldo from "../../../components/admin/general-admin/totalsaldo";
 import CardItem from "../../../components/admin/general-admin/carditem";
-import { Loader2, Boxes, Users } from "lucide-react";
+import { 
+    Loader2, 
+    Boxes, 
+    Users, 
+    TrendingUp, 
+    TrendingDown, 
+    Package, 
+    CheckCircle,
+    ChevronRight,
+    Calendar
+} from "lucide-react";
 import StokCard from "../../../components/general/stokcard";
 import TitleAdd from "../../../components/general/title-add";
 import DetailStokModal from "../../../components/admin/kelola-barang/detail-stok-modal";
@@ -12,7 +22,7 @@ import { useSaldo, useLaporanHarian } from "../../../hooks/useKeuangan";
 import { stokService } from "../../../services/barang.service";
 import type { StokHarian } from "../../../types/barang.types";
 
-const Dashboard:React.FC = () => {
+const Dashboard: React.FC = () => {
     const navigate = useNavigate();
     
     // Fetch saldo dari backend
@@ -65,91 +75,129 @@ const Dashboard:React.FC = () => {
     // Calculate total jumlah ambil dan setor dari semua stok hari ini
     const totalJumlahAmbil = stokHariIni.reduce((acc, item) => acc + (item.jumlah_ambil || 0), 0);
     const totalJumlahSetor = stokHariIni.reduce((acc, item) => acc + (item.jumlah_setor || 0), 0);
+
+    // Get today's date
+    const today = new Date().toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
     
-    return(
+    return (
         <div className="flex flex-col min-h-screen bg-[#121212]">
             <Header />
-                <main className="flex flex-col mt-[3.5rem] gap-3 p-3 mb-[4rem]">
-                    {/* Total Saldo - gunakan data dari backend */}
-                    <Total_Saldo saldo={saldo?.totalSaldo} isLoading={loadingSaldo} />
-                    
-                    <section className="flex flex-row gap-2">
-                        {/* Pemasukan & Pengeluaran dari laporan harian */}
-                        <CardItem 
-                            label="Pemasukan" 
-                            value={loadingLaporan ? "..." : formatRupiah(laporan?.pemasukan.total || 0)}
-                        />
-                        <CardItem 
-                            label="Pengeluaran" 
-                            value={loadingLaporan ? "..." : formatRupiah(laporan?.pengeluaran.total || 0)}
-                        />
-                    </section>
-                    
-                    {/* Clickable cards that navigate to status-user */}
-                    <section 
-                        className="flex flex-row gap-2 cursor-pointer" 
-                        onClick={() => navigate('/admin/status-user')}
-                    >
-                        <CardItem label="Jumlah Ambil" value={loadingStok ? "..." : totalJumlahAmbil.toString()}/>
-                        <CardItem label="Jumlah Setor" value={loadingStok ? "..." : totalJumlahSetor.toString()}/>
-                    </section>
+            <main className="flex flex-col mt-[3.5rem] gap-4 p-4 mb-[5rem]">
+                {/* Date Header */}
+                <div className="flex items-center gap-2 text-[#888]">
+                    <Calendar className="w-4 h-4" />
+                    <span className="text-sm">{today}</span>
+                </div>
 
-                    {/* Quick link to Status User */}
-                    <button
+                {/* Total Saldo */}
+                <Total_Saldo saldo={saldo?.totalSaldo} isLoading={loadingSaldo} />
+                
+                {/* Pemasukan & Pengeluaran Hari Ini */}
+                <div className="grid grid-cols-2 gap-3">
+                    <CardItem 
+                        label="Pemasukan Hari Ini" 
+                        value={loadingLaporan ? "..." : formatRupiah(laporan?.pemasukan.total || 0)}
+                        icon={TrendingUp}
+                        variant="income"
+                        prefix="+Rp "
+                    />
+                    <CardItem 
+                        label="Pengeluaran Hari Ini" 
+                        value={loadingLaporan ? "..." : formatRupiah(laporan?.pengeluaran.total || 0)}
+                        icon={TrendingDown}
+                        variant="expense"
+                        prefix="-Rp "
+                    />
+                </div>
+                
+                {/* Jumlah Ambil & Setor - Click to navigate */}
+                <div className="grid grid-cols-2 gap-3">
+                    <CardItem 
+                        label="Total Ambil" 
+                        value={loadingStok ? "..." : `${totalJumlahAmbil} pcs`}
+                        icon={Package}
+                        variant="default"
                         onClick={() => navigate('/admin/status-user')}
-                        className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#B09331]/20 to-[#D4AF37]/20 border border-[#B09331]/30 rounded-xl p-3 hover:bg-[#B09331]/30 transition-all"
-                    >
-                        <Users className="w-5 h-5 text-[#B09331]" />
-                        <span className="text-[#B09331] font-semibold">Lihat Status User Hari Ini</span>
-                    </button>
-                    
-                    <TitleAdd title="Stok Hari Ini" navigateTo="/admin/kelola-barang/tambah-stok"/>
-                    
-                    {loadingStok ? (
-                        <div className="flex items-center justify-center h-[10rem] bg-[#1e1e1e] rounded-xl">
-                            <div className="flex flex-col items-center gap-2 text-[#888]">
-                                <Loader2 className="w-8 h-8 animate-spin" />
-                                <p className="text-sm">Memuat stok...</p>
-                            </div>
-                        </div>
-                    ) : stokHariIni.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-[10rem] bg-[#1e1e1e] rounded-xl border border-dashed border-[#444]">
-                            <Boxes className="w-12 h-12 text-[#444] mb-2" />
-                            <p className="text-[#888] text-sm">Belum ada stok hari ini</p>
-                            <p className="text-[#666] text-xs">Klik + untuk menambah stok baru</p>
-                        </div>
-                    ) : (
-                        <div className="flex flex-row flex-wrap justify-around gap-2">
-                            {stokHariIni.map((item) => (
-                                <StokCard 
-                                    key={item.id}
-                                    id={item.id}
-                                    nama_item={item.barang?.nama || "Unknown"}
-                                    harga_item={item.harga}
-                                    jumlah_stok={item.stok}
-                                    jumlah_ambil={item.jumlah_ambil}
-                                    jumlah_setor={item.jumlah_setor}
-                                    modal={item.modal}
-                                    tanggalEdar={item.tanggalEdar}
-                                    keterangan={item.keterangan}
-                                    gambar={item.barang?.gambar}
-                                    onClick={() => handleStokClick(item)}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </main>
+                    />
+                    <CardItem 
+                        label="Total Setor" 
+                        value={loadingStok ? "..." : `${totalJumlahSetor} pcs`}
+                        icon={CheckCircle}
+                        variant="info"
+                        onClick={() => navigate('/admin/status-user')}
+                    />
+                </div>
 
-                {/* Stok Detail Modal */}
-                <DetailStokModal
-                    stok={selectedStok}
-                    isOpen={showStokModal}
-                    onClose={handleCloseStokModal}
-                />
+                {/* Quick Link to Status User */}
+                <button
+                    onClick={() => navigate('/admin/status-user')}
+                    className="flex items-center justify-between bg-[#1e1e1e] border border-[#333] rounded-xl p-3 hover:border-[#B09331]/50 transition-all group"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#B09331]/10 flex items-center justify-center">
+                            <Users className="w-5 h-5 text-[#B09331]" />
+                        </div>
+                        <div className="text-left">
+                            <p className="text-white font-medium">Status User Hari Ini</p>
+                            <p className="text-[#888] text-xs">Lihat siapa yang sudah ambil & setor</p>
+                        </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-[#888] group-hover:text-[#B09331] transition-colors" />
+                </button>
+                
+                {/* Stok Hari Ini Section */}
+                <TitleAdd title="Stok Hari Ini" navigateTo="/admin/kelola-barang/tambah-stok"/>
+                
+                {loadingStok ? (
+                    <div className="flex items-center justify-center h-[10rem] bg-[#1e1e1e] rounded-xl border border-[#333]">
+                        <div className="flex flex-col items-center gap-2 text-[#888]">
+                            <Loader2 className="w-8 h-8 animate-spin" />
+                            <p className="text-sm">Memuat stok...</p>
+                        </div>
+                    </div>
+                ) : stokHariIni.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-[10rem] bg-[#1e1e1e] rounded-xl border border-dashed border-[#444]">
+                        <Boxes className="w-12 h-12 text-[#444] mb-2" />
+                        <p className="text-[#888] text-sm">Belum ada stok hari ini</p>
+                        <p className="text-[#666] text-xs">Klik + untuk menambah stok baru</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                        {stokHariIni.map((item) => (
+                            <StokCard 
+                                key={item.id}
+                                id={item.id}
+                                nama_item={item.barang?.nama || "Unknown"}
+                                harga_item={item.harga}
+                                jumlah_stok={item.stok}
+                                jumlah_ambil={item.jumlah_ambil}
+                                jumlah_setor={item.jumlah_setor}
+                                modal={item.modal}
+                                tanggalEdar={item.tanggalEdar}
+                                keterangan={item.keterangan}
+                                gambar={item.barang?.gambar}
+                                onClick={() => handleStokClick(item)}
+                            />
+                        ))}
+                    </div>
+                )}
+            </main>
+
+            {/* Stok Detail Modal */}
+            <DetailStokModal
+                stok={selectedStok}
+                isOpen={showStokModal}
+                onClose={handleCloseStokModal}
+            />
 
             <Navbar />
         </div>
-    )
-}
+    );
+};
 
-export default Dashboard
+export default Dashboard;

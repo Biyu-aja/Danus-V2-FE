@@ -134,10 +134,11 @@ export class UserService {
                 return txDate.getDate() === day && txDate.getMonth() === month - 1 && txDate.getFullYear() === year;
             });
 
-            if (dailyTx.length > 0) {
-                let totalAmbil = 0;
-                let totalSetor = 0;
+            // Declare outside if block so they're in scope for calendar.push()
+            let totalAmbil = 0;
+            let totalSetor = 0;
 
+            if (dailyTx.length > 0) {
                 for (const tx of dailyTx) {
                     // Check details if available (assuming detailSetor exists based on previous simple types)
                     // If complex detail logic is needed, we traverse detailSetor

@@ -27,6 +27,37 @@ export const getHistoriTransaksi = asyncHandler(async (req: Request, res: Respon
 });
 
 /**
+ * GET /api/keuangan/histori/bulanan
+ * Get histori transaksi berdasarkan bulan
+ */
+export const getHistoriByMonth = asyncHandler(async (req: Request, res: Response) => {
+    const { bulan } = req.query;
+
+    let year: number;
+    let month: number;
+
+    if (bulan && typeof bulan === 'string') {
+        const parts = bulan.split('-');
+        if (parts.length !== 2) {
+            throw new ValidationError('Format bulan harus YYYY-MM');
+        }
+        year = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10);
+
+        if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
+            throw new ValidationError('Format bulan tidak valid');
+        }
+    } else {
+        const now = new Date();
+        year = now.getFullYear();
+        month = now.getMonth() + 1;
+    }
+
+    const result = await keuanganService.getHistoriByMonth(year, month);
+    return successResponse(res, result, 'Berhasil mendapatkan histori transaksi bulanan');
+});
+
+/**
  * POST /api/keuangan/pengeluaran
  * Catat pengeluaran manual
  */

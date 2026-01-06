@@ -14,6 +14,10 @@ export interface DetailKeuangan {
     nominal: number;
     keterangan: string | null;
     createdAt: string;
+    penyetor?: {
+        id: number;
+        nama_lengkap: string;
+    } | null;
 }
 
 export interface LaporanHarian {
