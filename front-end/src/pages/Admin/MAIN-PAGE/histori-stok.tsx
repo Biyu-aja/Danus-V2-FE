@@ -283,7 +283,7 @@ const HistoriStokPage: React.FC = () => {
                                     {items.map((stok) => (
                                         <div 
                                             key={stok.id} 
-                                            onClick={() => navigate(`/admin/histori-stok/${stok.id}`)}
+                                            onClick={() => navigate(`/admin/detail-stok/${stok.id}`)}
                                             className="cursor-pointer"
                                         >
                                             <StokCard

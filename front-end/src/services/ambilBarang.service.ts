@@ -237,6 +237,42 @@ export const ambilBarangService = {
             };
         }
     },
+
+    /**
+     * Update keterangan ambil barang
+     */
+    async updateKeterangan(ambilBarangId: number, keterangan: string): Promise<ApiResponse<AmbilBarang>> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/ambil-barang/${ambilBarangId}/keterangan`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ keterangan }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: data.message || 'Gagal mengupdate keterangan',
+                };
+            }
+
+            return {
+                success: true,
+                message: data.message || 'Berhasil mengupdate keterangan',
+                data: data.data,
+            };
+        } catch (error) {
+            console.error('Update keterangan error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
+    },
 };
 
 export default ambilBarangService;

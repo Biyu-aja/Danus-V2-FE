@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
     getSaldo,
     getHistoriTransaksi,
+    getHistoriByMonth,
     createPengeluaran,
     createPemasukan,
     getLaporanHarian,
@@ -21,6 +22,12 @@ router.get('/saldo', getSaldo);
  * @desc Get histori transaksi
  */
 router.get('/histori', getHistoriTransaksi);
+
+/**
+ * @route GET /api/keuangan/histori/bulanan
+ * @desc Get histori transaksi berdasarkan bulan
+ */
+router.get('/histori/bulanan', getHistoriByMonth);
 
 /**
  * @route POST /api/keuangan/pengeluaran

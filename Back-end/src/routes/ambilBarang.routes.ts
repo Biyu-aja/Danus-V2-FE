@@ -4,6 +4,7 @@ import {
     getAmbilBarangByUserId,
     getAmbilBarangBelumSetor,
     getAmbilBarangById,
+    updateKeterangan,
 } from '../controllers/ambilBarang.controller';
 
 const router = Router();
@@ -31,5 +32,11 @@ router.get('/user/:userId', getAmbilBarangByUserId);
  * @desc Get ambil barang by ID
  */
 router.get('/:id', getAmbilBarangById);
+
+/**
+ * @route PATCH /api/ambil-barang/:id/keterangan
+ * @desc Update keterangan ambil barang
+ */
+router.patch('/:id/keterangan', updateKeterangan);
 
 export default router;

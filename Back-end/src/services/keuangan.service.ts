@@ -21,6 +21,13 @@ export class KeuanganService {
     }
 
     /**
+     * Get histori transaksi berdasarkan bulan
+     */
+    async getHistoriByMonth(year: number, month: number) {
+        return keuanganRepository.getHistoriByMonth(year, month);
+    }
+
+    /**
      * Catat pengeluaran manual
      */
     async createPengeluaran(data: CreatePengeluaranRequest) {

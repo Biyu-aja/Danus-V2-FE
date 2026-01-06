@@ -49,7 +49,7 @@ const Routes = createBrowserRouter([
         element: <HistoriStokPage />
     },
     {
-        path: "/admin/histori-stok/:id",
+        path: "/admin/detail-stok/:id",
         element: <HistoriStokDetailPage />
     },
     {

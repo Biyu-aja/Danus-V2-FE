@@ -54,6 +54,29 @@ export const keuanganService = {
     },
 
     /**
+     * Get histori transaksi berdasarkan bulan
+     */
+    async getHistoriByMonth(bulan?: string): Promise<DetailKeuangan[]> {
+        try {
+            const url = bulan
+                ? `${API_BASE_URL}/keuangan/histori/bulanan?bulan=${bulan}`
+                : `${API_BASE_URL}/keuangan/histori/bulanan`;
+
+            const response = await fetch(url);
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.message);
+            }
+
+            return result.data;
+        } catch (error) {
+            console.error('Error fetching histori bulanan:', error);
+            throw error;
+        }
+    },
+
+    /**
      * Create pengeluaran manual
      */
     async createPengeluaran(payload: {

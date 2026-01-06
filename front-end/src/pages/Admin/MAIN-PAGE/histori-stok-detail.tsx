@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/general/header";
 import Navbar from "../../../components/admin/general-admin/navbar";
+import UserDetailSetorModal from "../../../components/admin/kelola-barang/user-detail-setor-modal";
 import { 
     Loader2, 
     Search, 
@@ -40,6 +41,10 @@ const HistoriStokDetailPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('SEMUA');
+    
+    // Modal state
+    const [selectedUser, setSelectedUser] = useState<UserTransaction | null>(null);
+    const [showModal, setShowModal] = useState(false);
 
     // Fetch stok detail with users
     useEffect(() => {
@@ -316,7 +321,11 @@ const HistoriStokDetailPage: React.FC = () => {
                             return (
                                 <div 
                                     key={userTx.user.id}
-                                    className="bg-[#1e1e1e] rounded-xl border border-[#333] overflow-hidden"
+                                    onClick={() => {
+                                        setSelectedUser(userTx);
+                                        setShowModal(true);
+                                    }}
+                                    className="bg-[#1e1e1e] rounded-xl border border-[#333] overflow-hidden hover:border-[#B09331]/50 transition-all cursor-pointer"
                                 >
                                     <div className="p-4">
                                         <div className="flex items-start justify-between gap-3">
@@ -387,6 +396,32 @@ const HistoriStokDetailPage: React.FC = () => {
             </main>
 
             <Navbar />
+
+            {/* User Detail Modal */}
+            {selectedUser && stok && (
+                <UserDetailSetorModal
+                    isOpen={showModal}
+                    onClose={() => {
+                        setShowModal(false);
+                        setSelectedUser(null);
+                    }}
+                    onSuccess={() => {
+                        setShowModal(false);
+                        setSelectedUser(null);
+                        // Refresh data
+                        const fetchData = async () => {
+                            const response = await stokService.getStokDetail(parseInt(id!, 10));
+                            if (response.success && response.data) {
+                                setStok(response.data);
+                            }
+                        };
+                        fetchData();
+                    }}
+                    userId={selectedUser.user.id}
+                    userName={selectedUser.user.nama_lengkap}
+                    date={new Date(stok.tanggalEdar)}
+                />
+            )}
         </div>
     );
 };

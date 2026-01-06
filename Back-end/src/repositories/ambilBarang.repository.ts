@@ -178,6 +178,41 @@ export class AmbilBarangRepository {
             data: { status },
         });
     }
+
+    /**
+     * Update keterangan ambil barang
+     */
+    async updateKeterangan(id: number, keterangan: string) {
+        return prisma.ambilBarang.update({
+            where: { id },
+            data: { keterangan },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        nama_lengkap: true,
+                        username: true,
+                    },
+                },
+                setorKepada: {
+                    select: {
+                        id: true,
+                        nama_lengkap: true,
+                        username: true,
+                    },
+                },
+                detailSetor: {
+                    include: {
+                        stokHarian: {
+                            include: {
+                                barang: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
 }
 
 export const ambilBarangRepository = new AmbilBarangRepository();

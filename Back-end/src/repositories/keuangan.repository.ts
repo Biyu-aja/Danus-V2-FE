@@ -87,6 +87,53 @@ export class KeuanganRepository {
     }
 
     /**
+     * Get histori transaksi berdasarkan bulan
+     */
+    async getHistoriByMonth(year: number, month: number) {
+        const startOfMonth = new Date(year, month - 1, 1);
+        const endOfMonth = new Date(year, month, 0, 23, 59, 59, 999);
+
+        const data = await prisma.detailKeuangan.findMany({
+            where: {
+                createdAt: {
+                    gte: startOfMonth,
+                    lte: endOfMonth,
+                },
+            },
+            include: {
+                detailSetor: {
+                    include: {
+                        ambilBarang: {
+                            include: {
+                                user: {
+                                    select: {
+                                        id: true,
+                                        nama_lengkap: true,
+                                    },
+                                },
+                            },
+                        },
+                        stokHarian: {
+                            include: {
+                                barang: true,
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        // Transform data to include penyetor info at top level
+        const transformedData = data.map(item => ({
+            ...item,
+            penyetor: item.detailSetor?.ambilBarang?.user || null,
+        }));
+
+        return transformedData;
+    }
+
+    /**
      * Get laporan harian
      */
     async getLaporanHarian(tanggal: Date) {
