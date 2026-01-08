@@ -207,8 +207,8 @@ const HistoriStokDetailPage: React.FC = () => {
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
-                        <h1 className="text-white text-lg font-bold">Status User</h1>
-                        <p className="text-[#888] text-sm">Histori stok</p>
+                        <h1 className="text-white text-lg font-bold">Detail Stok</h1>
+                        <p className="text-[#888] text-sm">Detail Stok {stok.barang?.nama} Tanggal {formatTanggal(stok.tanggalEdar)}</p>
                     </div>
                 </div>
 

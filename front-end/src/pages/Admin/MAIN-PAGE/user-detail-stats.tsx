@@ -15,6 +15,8 @@ import {
     Package
 } from "lucide-react";
 import { userService, type UserStats, type CalendarDay } from "../../../services/user.service";
+import { FaWhatsapp } from "react-icons/fa6";
+import { formatWhatsAppNumber } from "../../../helper/formatwhatsapp";
 
 const UserDetailStatsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -148,7 +150,7 @@ const UserDetailStatsPage: React.FC = () => {
                     </button>
                     <div>
                         <h1 className="text-white text-lg font-bold">Statistik User</h1>
-                        <p className="text-[#888] text-sm">Detail aktivitas bulanan</p>
+                        <p className="text-[#888] text-sm">Detail aktivitas bulanan {stats?.user.nama_lengkap}</p>
                     </div>
                 </div>
 
@@ -164,14 +166,23 @@ const UserDetailStatsPage: React.FC = () => {
                 ) : (
                     <>
                         {/* User Card */}
-                        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#333] flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-[#333] flex items-center justify-center text-[#888]">
-                                <User className="w-6 h-6" />
+                        <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#333] flex flex-row justify-between items-center">
+                            <div className="flex flex-row gap-2 items-center">
+                                <div className="w-12 h-12 rounded-full bg-[#333] flex items-center justify-center text-[#888]">
+                                    <User className="w-6 h-6" />
+                                </div>
+                                <h2 className="text-white font-bold text-lg">{stats.user.nama_lengkap}</h2>
                             </div>
                             <div>
-                                <h2 className="text-white font-bold text-lg">{stats.user.nama_lengkap}</h2>
-                                <p className="text-[#888]">@{stats.user.username}</p>
-                                <p className="text-[#888] text-sm mt-1">{stats.user.nomor_telepon}</p>
+                                <button className="bg-green-500 p-2 rounded flex items-center justify-center gap-2"
+                                    onClick={()=>window.open(
+                                        `https://wa.me/${formatWhatsAppNumber(stats.user.nomor_telepon)}`,
+                                        "_blank"
+                                    )}
+                                >
+                                    <FaWhatsapp />
+                                    Hubungi {stats.user.nama_lengkap}
+                                </button>
                             </div>
                         </div>
 

@@ -248,6 +248,65 @@ export class KeuanganRepository {
             jumlahHariAktif: transaksiPerHari.length,
         };
     }
+
+    /**
+     * Get detail keuangan by ID
+     */
+    async findById(id: number) {
+        return prisma.detailKeuangan.findUnique({
+            where: { id },
+            include: {
+                detailSetor: {
+                    include: {
+                        ambilBarang: {
+                            include: {
+                                user: {
+                                    select: {
+                                        id: true,
+                                        nama_lengkap: true,
+                                        username: true,
+                                        nomor_telepon: true,
+                                    },
+                                },
+                            },
+                        },
+                        stokHarian: {
+                            include: {
+                                barang: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    /**
+     * Update detail keuangan (for manual entries only)
+     */
+    async updateDetailKeuangan(
+        tx: TransactionClient,
+        id: number,
+        data: {
+            title?: string;
+            nominal?: number;
+            keterangan?: string;
+        }
+    ) {
+        return tx.detailKeuangan.update({
+            where: { id },
+            data,
+        });
+    }
+
+    /**
+     * Delete detail keuangan
+     */
+    async deleteDetailKeuangan(tx: TransactionClient, id: number) {
+        return tx.detailKeuangan.delete({
+            where: { id },
+        });
+    }
 }
 
 export const keuanganRepository = new KeuanganRepository();

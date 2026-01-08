@@ -7,6 +7,9 @@ import {
     createPemasukan,
     getLaporanHarian,
     getLaporanBulanan,
+    getDetailKeuanganById,
+    updateDetailKeuangan,
+    deleteDetailKeuangan,
 } from '../controllers/keuangan.controller';
 
 const router = Router();
@@ -52,5 +55,23 @@ router.get('/laporan/harian', getLaporanHarian);
  * @desc Get laporan bulanan
  */
 router.get('/laporan/bulanan', getLaporanBulanan);
+
+/**
+ * @route GET /api/keuangan/:id
+ * @desc Get detail keuangan by ID
+ */
+router.get('/:id', getDetailKeuanganById);
+
+/**
+ * @route PATCH /api/keuangan/:id
+ * @desc Update detail keuangan
+ */
+router.patch('/:id', updateDetailKeuangan);
+
+/**
+ * @route DELETE /api/keuangan/:id
+ * @desc Delete detail keuangan
+ */
+router.delete('/:id', deleteDetailKeuangan);
 
 export default router;
