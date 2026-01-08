@@ -16,11 +16,13 @@ import {
     CalendarIcon,
     PhoneIcon,
     NotebookIcon,
-    Save
+    Save,
+    ExternalLink
 } from "lucide-react";
 import { ambilBarangService, type AmbilBarang, type DetailSetor } from "../../../services/ambilBarang.service";
 import { userService, type User as UserType } from "../../../services/user.service";
 import { FaWhatsapp } from "react-icons/fa6";
+import TransactionDetailModal from "./transaction-detail-modal";
 
 interface UserDetailSetorModalProps {
     isOpen: boolean;
@@ -62,6 +64,10 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
     const [note, setNote] = useState<string>("");
     const [originalNote, setOriginalNote] = useState<string>("");
     const [savingNote, setSavingNote] = useState(false);
+    
+    // Transaction detail modal state
+    const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
 
     // Fetch data when modal opens
     useEffect(() => {
@@ -285,12 +291,6 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                             <NotebookIcon className="w-5 h-5 text-[#B09331]"/>
                             <p className="text-white font-bold text-lg">Detail Absen Danus</p>
                         </div>
-                        <button 
-                            onClick={onClose}
-                            className="w-8 h-8 rounded-full bg-[#333] flex items-center justify-center text-[#888] hover:text-white hover:bg-[#444] transition-colors"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
                     </div>
                     <div className="flex items-center gap-2">
                         <User className="w-5 h-5 text-[#888]" />
@@ -400,10 +400,21 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                                                                 Max: {item.qty} item
                                                             </p>
                                                         </div>
-                                                        <div className="text-right">
+                                                        <div className="text-right flex items-center gap-2">
                                                             <p className="text-[#B09331] font-bold">
                                                                 Rp {formatRupiah(isSelected ? (selectedItem!.qty * selectedItem!.hargaSatuan) : item.totalHarga)}
                                                             </p>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedDetailId(item.id);
+                                                                    setShowDetailModal(true);
+                                                                }}
+                                                                className="w-7 h-7 rounded-lg bg-[#333] hover:bg-[#444] flex items-center justify-center text-[#888] hover:text-white transition-colors"
+                                                                title="Lihat Detail"
+                                                            >
+                                                                <ExternalLink className="w-3.5 h-3.5" />
+                                                            </button>
                                                         </div>
                                                     </div>
 
@@ -472,12 +483,17 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                                     <div className="flex items-center gap-2 mb-2">
                                         <CheckCircle className="w-4 h-4 text-green-400" />
                                         <span className="text-white text-sm font-medium">Sudah Disetor</span>
+                                        <span className="text-[#888] text-xs">(klik untuk detail)</span>
                                     </div>
                                     <div className="space-y-2">
                                         {depositedItems.map(item => (
                                             <div 
                                                 key={item.id}
-                                                className="flex items-center gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/20"
+                                                onClick={() => {
+                                                    setSelectedDetailId(item.id);
+                                                    setShowDetailModal(true);
+                                                }}
+                                                className="flex items-center gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/20 cursor-pointer hover:bg-green-500/10 transition-colors"
                                             >
                                                 <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
                                                 <div className="flex-1">
@@ -486,10 +502,11 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                                                         {item.qty} × Rp {formatRupiah(item.stokHarian.harga)}
                                                     </p>
                                                 </div>
-                                                <div className="text-right">
+                                                <div className="text-right flex items-center gap-2">
                                                     <p className="text-green-400 font-bold">
                                                         Rp {formatRupiah(item.totalHarga)}
                                                     </p>
+                                                    <ExternalLink className="w-4 h-4 text-green-400/50" />
                                                 </div>
                                             </div>
                                         ))}
@@ -622,6 +639,19 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                     </div>
                 )}
             </div>
+
+            {/* Transaction Detail Modal */}
+            <TransactionDetailModal
+                detailSetorId={selectedDetailId}
+                isOpen={showDetailModal}
+                onClose={() => {
+                    setShowDetailModal(false);
+                    setSelectedDetailId(null);
+                }}
+                onSuccess={() => {
+                    fetchData();
+                }}
+            />
         </div>
     );
 };

@@ -175,6 +175,72 @@ export const keuanganService = {
             throw error;
         }
     },
+
+    /**
+     * Get detail keuangan by ID
+     */
+    async getDetailKeuanganById(id: number): Promise<DetailKeuangan | null> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/keuangan/${id}`);
+            const data = await response.json();
+
+            if (!data.success) {
+                return null;
+            }
+
+            return data.data;
+        } catch (error) {
+            console.error('Error fetching detail keuangan:', error);
+            return null;
+        }
+    },
+
+    /**
+     * Update detail keuangan
+     */
+    async updateDetailKeuangan(id: number, payload: {
+        title?: string;
+        nominal?: number;
+        keterangan?: string;
+    }): Promise<{ success: boolean; message: string; data?: DetailKeuangan }> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/keuangan/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await response.json();
+
+            return {
+                success: data.success,
+                message: data.message,
+                data: data.data,
+            };
+        } catch (error) {
+            console.error('Error updating detail keuangan:', error);
+            return { success: false, message: 'Terjadi kesalahan jaringan' };
+        }
+    },
+
+    /**
+     * Delete detail keuangan
+     */
+    async deleteDetailKeuangan(id: number): Promise<{ success: boolean; message: string }> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/keuangan/${id}`, {
+                method: 'DELETE',
+            });
+            const data = await response.json();
+
+            return {
+                success: data.success,
+                message: data.message,
+            };
+        } catch (error) {
+            console.error('Error deleting detail keuangan:', error);
+            return { success: false, message: 'Terjadi kesalahan jaringan' };
+        }
+    },
 };
 
 export default keuanganService;

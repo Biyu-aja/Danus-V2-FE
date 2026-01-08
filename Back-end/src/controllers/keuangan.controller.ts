@@ -108,3 +108,35 @@ export const getLaporanBulanan = asyncHandler(async (req: Request, res: Response
     const laporan = await keuanganService.getLaporanBulanan(query.bulan);
     return successResponse(res, laporan, 'Berhasil mendapatkan laporan bulanan');
 });
+
+/**
+ * GET /api/keuangan/:id
+ * Get detail keuangan by ID
+ */
+export const getDetailKeuanganById = asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    const detail = await keuanganService.getDetailKeuanganById(id);
+    return successResponse(res, detail, 'Berhasil mendapatkan detail transaksi');
+});
+
+/**
+ * PATCH /api/keuangan/:id
+ * Update detail keuangan
+ */
+export const updateDetailKeuangan = asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    const { title, nominal, keterangan } = req.body;
+
+    const updated = await keuanganService.updateDetailKeuangan(id, { title, nominal, keterangan });
+    return successResponse(res, updated, 'Transaksi berhasil diupdate');
+});
+
+/**
+ * DELETE /api/keuangan/:id
+ * Delete detail keuangan
+ */
+export const deleteDetailKeuangan = asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    const result = await keuanganService.deleteDetailKeuangan(id);
+    return successResponse(res, result, 'Transaksi berhasil dihapus');
+});

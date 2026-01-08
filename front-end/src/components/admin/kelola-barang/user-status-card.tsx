@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import UserDetailSetorModal from "./user-detail-setor-modal";
 import type { UserWithStatus } from "../../../services/user.service";
+import { formatWhatsAppNumber } from "../../../helper/formatwhatsapp";
 
 interface UserStatusCardProps {
     user: UserWithStatus;
@@ -64,9 +65,6 @@ const UserStatusCard: React.FC<UserStatusCardProps> = ({
     };
 
     // Format phone number for WhatsApp
-    const formatWhatsAppNumber = (phone: string) => {
-        return phone.replace(/^0/, '62').replace(/[^0-9]/g, '');
-    };
 
     return (
         <>

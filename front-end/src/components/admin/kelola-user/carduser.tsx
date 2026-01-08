@@ -68,8 +68,6 @@ const CardUser: React.FC<CardUserProps> = ({ user }) => {
 
                     {/* Sub-header: Username & Phone */}
                     <div className="flex items-center gap-3 text-[#888] text-xs mb-3">
-                        <span>@{user.username}</span>
-                        <span>•</span>
                         <div className="flex items-center gap-1">
                             <Phone className="w-3 h-3" />
                             {user.nomor_telepon}

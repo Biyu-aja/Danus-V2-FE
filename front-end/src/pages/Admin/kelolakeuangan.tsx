@@ -3,6 +3,7 @@ import Header from "../../components/general/header";
 import Navbar from "../../components/admin/general-admin/navbar";
 import TambahTransaksiModal from "../../components/admin/kelola-keuangan/tambah-transaksi-modal";
 import ExportModal from "../../components/admin/kelola-keuangan/export-modal";
+import KeuanganDetailModal from "../../components/admin/kelola-keuangan/keuangan-detail-modal";
 import { keuanganService } from "../../services/keuangan.service";
 import type { DetailKeuangan, Saldo } from "../../types/keuangan.types";
 import { 
@@ -32,6 +33,8 @@ const KelolaKeuangan: React.FC = () => {
     const [showExportModal, setShowExportModal] = useState(false);
     const [showFabMenu, setShowFabMenu] = useState(false);
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedTransaksi, setSelectedTransaksi] = useState<DetailKeuangan | null>(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
 
     // Format untuk API: YYYY-MM
     const getMonthString = (date: Date) => {
@@ -235,7 +238,11 @@ const KelolaKeuangan: React.FC = () => {
                                     {items.map(item => (
                                         <div 
                                             key={item.id}
-                                            className="flex items-center gap-3 p-3 bg-[#1e1e1e] rounded-xl border border-[#333]"
+                                            onClick={() => {
+                                                setSelectedTransaksi(item);
+                                                setShowDetailModal(true);
+                                            }}
+                                            className="flex items-center gap-3 p-3 bg-[#1e1e1e] rounded-xl border border-[#333] cursor-pointer hover:border-[#B09331]/50 transition-colors"
                                         >
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                                                 item.tipe === 'PEMASUKAN' 
@@ -344,6 +351,17 @@ const KelolaKeuangan: React.FC = () => {
                 onClose={() => setShowExportModal(false)}
                 histori={histori}
                 bulan={getMonthName(currentDate)}
+            />
+
+            {/* Detail Modal */}
+            <KeuanganDetailModal
+                transaksi={selectedTransaksi}
+                isOpen={showDetailModal}
+                onClose={() => {
+                    setShowDetailModal(false);
+                    setSelectedTransaksi(null);
+                }}
+                onSuccess={fetchData}
             />
         </div>
     );

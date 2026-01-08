@@ -154,6 +154,84 @@ export class KeuanganService {
 
         return keuanganRepository.getLaporanBulanan(year, month);
     }
+
+    /**
+     * Get detail keuangan by ID
+     */
+    async getDetailKeuanganById(id: number) {
+        const detail = await keuanganRepository.findById(id);
+        if (!detail) {
+            throw new ValidationError('Transaksi tidak ditemukan');
+        }
+        return detail;
+    }
+
+    /**
+     * Update detail keuangan (only for manual entries - no detailSetorId)
+     */
+    async updateDetailKeuangan(id: number, data: { title?: string; nominal?: number; keterangan?: string }) {
+        const existing = await keuanganRepository.findById(id);
+        if (!existing) {
+            throw new ValidationError('Transaksi tidak ditemukan');
+        }
+
+        // Only allow editing manual entries (no linked detailSetor)
+        if (existing.detailSetorId !== null) {
+            throw new ValidationError('Tidak dapat mengedit transaksi dari setor barang');
+        }
+
+        // If nominal changes, need to adjust saldo
+        const nominalDiff = (data.nominal || existing.nominal) - existing.nominal;
+
+        return withTransaction(async (tx) => {
+            // Update the record
+            await keuanganRepository.updateDetailKeuangan(tx, id, data);
+
+            // Adjust saldo if nominal changed
+            if (nominalDiff !== 0) {
+                if (existing.tipe === 'PEMASUKAN') {
+                    // Pemasukan: increase = increment saldo
+                    await keuanganRepository.updateSaldo(tx, nominalDiff);
+                } else {
+                    // Pengeluaran: increase = decrement saldo
+                    await keuanganRepository.updateSaldo(tx, -nominalDiff);
+                }
+            }
+
+            return keuanganRepository.findById(id);
+        });
+    }
+
+    /**
+     * Delete detail keuangan (only for manual entries)
+     */
+    async deleteDetailKeuangan(id: number) {
+        const existing = await keuanganRepository.findById(id);
+        if (!existing) {
+            throw new ValidationError('Transaksi tidak ditemukan');
+        }
+
+        // Only allow deleting manual entries (no linked detailSetor)
+        if (existing.detailSetorId !== null) {
+            throw new ValidationError('Tidak dapat menghapus transaksi dari setor barang');
+        }
+
+        return withTransaction(async (tx) => {
+            // Reverse the saldo effect
+            if (existing.tipe === 'PEMASUKAN') {
+                // Reverse pemasukan = decrement saldo
+                await keuanganRepository.updateSaldo(tx, -existing.nominal);
+            } else {
+                // Reverse pengeluaran = increment saldo
+                await keuanganRepository.updateSaldo(tx, existing.nominal);
+            }
+
+            // Delete the record
+            await keuanganRepository.deleteDetailKeuangan(tx, id);
+
+            return { success: true, message: 'Transaksi berhasil dihapus' };
+        });
+    }
 }
 
 export const keuanganService = new KeuanganService();

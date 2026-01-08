@@ -10,6 +10,7 @@ import ambilBarangRoutes from './routes/ambilBarang.routes';
 import setorRoutes from './routes/setor.routes';
 import keuanganRoutes from './routes/keuangan.routes';
 import authRoutes from './routes/auth.routes';
+import detailSetorRoutes from './routes/detailSetor.routes';
 
 const app: Application = express();
 
@@ -53,6 +54,7 @@ app.use('/api/stok', stokRoutes);
 app.use('/api/ambil-barang', ambilBarangRoutes);
 app.use('/api/setor', setorRoutes);
 app.use('/api/keuangan', keuanganRoutes);
+app.use('/api/detail-setor', detailSetorRoutes);
 
 // 404 Handler
 app.use((req: Request, res: Response) => {
