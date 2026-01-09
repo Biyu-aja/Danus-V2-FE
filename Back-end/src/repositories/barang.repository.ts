@@ -7,6 +7,9 @@ export class BarangRepository {
      */
     async findAll() {
         return prisma.barang.findMany({
+            where: {
+                deletedAt: null, // Hanya tampilkan barang yang belum dihapus
+            },
             include: {
                 stokHarian: {
                     orderBy: { tanggalEdar: 'desc' },
@@ -17,7 +20,29 @@ export class BarangRepository {
     }
 
     /**
-     * Get barang by ID
+     * Get all barang termasuk yang sudah dihapus (untuk filter histori)
+     * Include semua stokHarian untuk statistik
+     */
+    async findAllWithDeleted() {
+        return prisma.barang.findMany({
+            include: {
+                stokHarian: {
+                    orderBy: { tanggalEdar: 'desc' },
+                    include: {
+                        detailSetor: {
+                            where: {
+                                tanggalSetor: { not: null }, // Hanya yang sudah disetor
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: { nama: 'asc' },
+        });
+    }
+
+    /**
+     * Get barang by ID dengan statistik lengkap
      */
     async findById(id: number) {
         return prisma.barang.findUnique({
@@ -25,7 +50,13 @@ export class BarangRepository {
             include: {
                 stokHarian: {
                     orderBy: { tanggalEdar: 'desc' },
-                    take: 5,
+                    include: {
+                        detailSetor: {
+                            where: {
+                                tanggalSetor: { not: null }, // Hanya yang sudah disetor
+                            },
+                        },
+                    },
                 },
             },
         });
@@ -49,7 +80,10 @@ export class BarangRepository {
      */
     async findByNama(nama: string) {
         return prisma.barang.findFirst({
-            where: { nama },
+            where: {
+                nama,
+                deletedAt: null, // Hanya cari dari barang aktif
+            },
         });
     }
 
@@ -68,15 +102,29 @@ export class BarangRepository {
     }
 
     /**
-     * Delete barang
+     * Soft delete barang (set deletedAt)
      */
     async delete(id: number) {
-        return prisma.barang.delete({
+        return prisma.barang.update({
             where: { id },
+            data: {
+                deletedAt: new Date(),
+            },
+        });
+    }
+
+    /**
+     * Restore barang yang sudah dihapus (set deletedAt ke null)
+     */
+    async restore(id: number) {
+        return prisma.barang.update({
+            where: { id },
+            data: {
+                deletedAt: null,
+            },
         });
     }
 }
-
 export const barangRepository = new BarangRepository();
 
 

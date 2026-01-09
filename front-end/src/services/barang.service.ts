@@ -44,6 +44,76 @@ export const barangService = {
     },
 
     /**
+     * Get all barang termasuk yang sudah dihapus (untuk filter histori)
+     */
+    async getAllBarangWithDeleted(): Promise<ApiResponse<Barang[]>> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/barang/with-deleted`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: data.message || 'Gagal mendapatkan data barang',
+                };
+            }
+
+            return {
+                success: true,
+                message: data.message || 'Berhasil mendapatkan data barang',
+                data: data.data,
+            };
+        } catch (error) {
+            console.error('Get barang with deleted error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
+    },
+
+    /**
+     * Get barang by ID dengan statistik lengkap
+     */
+    async getBarangById(id: number): Promise<ApiResponse<Barang>> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/barang/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: data.message || 'Gagal mendapatkan data barang',
+                };
+            }
+
+            return {
+                success: true,
+                message: data.message || 'Berhasil mendapatkan data barang',
+                data: data.data,
+            };
+        } catch (error) {
+            console.error('Get barang by id error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
+    },
+
+    /**
      * Create barang baru
      */
     async createBarang(request: CreateBarangRequest): Promise<ApiResponse<Barang>> {
@@ -142,6 +212,41 @@ export const barangService = {
             };
         } catch (error) {
             console.error('Delete barang error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
+    },
+
+    /**
+     * Restore barang yang sudah dihapus
+     */
+    async restoreBarang(id: number): Promise<ApiResponse<Barang>> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/barang/${id}/restore`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: data.message || 'Gagal mengembalikan barang',
+                };
+            }
+
+            return {
+                success: true,
+                message: data.message || 'Berhasil mengembalikan barang',
+                data: data.data,
+            };
+        } catch (error) {
+            console.error('Restore barang error:', error);
             return {
                 success: false,
                 message: 'Terjadi kesalahan jaringan',

@@ -30,12 +30,18 @@ const HistoriStokPage: React.FC = () => {
     const [selectedBarangId, setSelectedBarangId] = useState<number | null>(null);
     const [showFilters, setShowFilters] = useState(false);
 
-    // Fetch barang list on mount
+    // Fetch barang list on mount (termasuk yang sudah dihapus untuk filter)
     useEffect(() => {
         const fetchBarang = async () => {
-            const response = await barangService.getAllBarang();
+            const response = await barangService.getAllBarangWithDeleted();
             if (response.success && response.data) {
-                setBarangList(response.data);
+                // Sort: barang aktif dulu, lalu yang dihapus
+                const sorted = [...response.data].sort((a, b) => {
+                    if (a.deletedAt && !b.deletedAt) return 1;
+                    if (!a.deletedAt && b.deletedAt) return -1;
+                    return a.nama.localeCompare(b.nama);
+                });
+                setBarangList(sorted);
             }
         };
         fetchBarang();
@@ -214,8 +220,12 @@ const HistoriStokPage: React.FC = () => {
                                 >
                                     <option value="">Semua Barang</option>
                                     {barangList.map(barang => (
-                                        <option key={barang.id} value={barang.id}>
-                                            {barang.nama}
+                                        <option 
+                                            key={barang.id} 
+                                            value={barang.id}
+                                            className={barang.deletedAt ? 'text-[#888]' : ''}
+                                        >
+                                            {barang.nama}{barang.deletedAt ? ' (dihapus)' : ''}
                                         </option>
                                     ))}
                                 </select>

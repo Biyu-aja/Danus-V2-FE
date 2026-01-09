@@ -11,6 +11,13 @@ export class BarangService {
     }
 
     /**
+     * Get all barang termasuk yang sudah dihapus (untuk filter histori)
+     */
+    async getAllBarangWithDeleted() {
+        return barangRepository.findAllWithDeleted();
+    }
+
+    /**
      * Get barang by ID
      */
     async getBarangById(id: number) {
@@ -76,7 +83,8 @@ export class BarangService {
     }
 
     /**
-     * Delete barang
+     * Soft delete barang (set deletedAt, tidak menghapus data)
+     * Histori stok tetap tersimpan untuk referensi
      */
     async deleteBarang(id: number) {
         // Cek barang exists
@@ -85,12 +93,30 @@ export class BarangService {
             throw new NotFoundError(`Barang dengan ID ${id} tidak ditemukan`);
         }
 
-        // Cek apakah masih ada stok terkait
-        if (barang.stokHarian && barang.stokHarian.length > 0) {
-            throw new ValidationError('Tidak dapat menghapus barang yang masih memiliki stok');
+        // Cek apakah sudah dihapus sebelumnya (type assertion karena prisma belum di-regenerate)
+        if ((barang as any).deletedAt) {
+            throw new ValidationError('Barang sudah dihapus sebelumnya');
         }
 
         return barangRepository.delete(id);
+    }
+
+    /**
+     * Restore barang yang sudah dihapus
+     */
+    async restoreBarang(id: number) {
+        // Cek barang exists
+        const barang = await barangRepository.findById(id);
+        if (!barang) {
+            throw new NotFoundError(`Barang dengan ID ${id} tidak ditemukan`);
+        }
+
+        // Cek apakah barang memang sudah dihapus
+        if (!barang.deletedAt) {
+            throw new ValidationError('Barang masih aktif, tidak perlu di-restore');
+        }
+
+        return barangRepository.restore(id);
     }
 }
 

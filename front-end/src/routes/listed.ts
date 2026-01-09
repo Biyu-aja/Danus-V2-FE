@@ -9,6 +9,7 @@ export const adminListed = {
     kelolaUser: 'kelola-user',
     kelolaUserDetail: 'kelola-user/:id',
     kelolaBarang: 'kelola-barang',
+    semuaBarang: 'semua-barang',
     tambahBarang: 'kelola-barang/tambah-barang',
     tambahStok: 'kelola-barang/tambah-stok',
     kelolaKeuangan: 'kelola-keuangan',

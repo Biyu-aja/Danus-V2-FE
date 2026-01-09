@@ -9,6 +9,7 @@ import TambahStokPage from "../pages/Admin/Kelola-Barang-Page/tambah-stok";
 import StatusUserPage from "../pages/Admin/MAIN-PAGE/status-user";
 import HistoriStokPage from "../pages/Admin/MAIN-PAGE/histori-stok";
 import HistoriStokDetailPage from "../pages/Admin/MAIN-PAGE/histori-stok-detail";
+import SemuaBarangPage from "../pages/Admin/MAIN-PAGE/semua-barang";
 import UserDetailStatsPage from "../pages/Admin/MAIN-PAGE/user-detail-stats";
 import UserDashboard from "../pages/User/dashboard";
 import RiwayatPage from "../pages/User/riwayat";
@@ -23,6 +24,7 @@ const adminChildRoutes = [
     { path: adminListed.kelolaUser, element: <KelolaUser /> },
     { path: adminListed.kelolaUserDetail, element: <UserDetailStatsPage /> },
     { path: adminListed.kelolaBarang, element: <KelolaBarang /> },
+    { path: adminListed.semuaBarang, element: <SemuaBarangPage /> },
     { path: adminListed.tambahBarang, element: <TambahBarangPage /> },
     { path: adminListed.tambahStok, element: <TambahStokPage /> },
     { path: adminListed.kelolaKeuangan, element: <KelolaKeuangan /> },

@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { X, Edit2, Trash2, Save, ImagePlus, Package, Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { X, Edit2, Trash2, Save, ImagePlus, Package, Loader2, AlertCircle, CheckCircle, Boxes, TrendingUp } from "lucide-react";
 import { barangService } from "../../../services/barang.service";
 import type { Barang } from "../../../types/barang.types";
 import InputText from "../../general/input";
@@ -14,6 +14,10 @@ interface DetailBarangProps {
 const DetailBarang: React.FC<DetailBarangProps> = ({ barang, onClose, onUpdate, onDelete }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     
+    // Barang data with full statistics
+    const [barangData, setBarangData] = useState<Barang>(barang);
+    const [isLoadingData, setIsLoadingData] = useState(true);
+
     // Mode state
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -28,6 +32,24 @@ const DetailBarang: React.FC<DetailBarangProps> = ({ barang, onClose, onUpdate, 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+
+    // Fetch fresh data with statistics
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoadingData(true);
+            try {
+                const response = await barangService.getBarangById(barang.id);
+                if (response.success && response.data) {
+                    setBarangData(response.data);
+                }
+            } catch (err) {
+                console.error('Error fetching barang detail:', err);
+            } finally {
+                setIsLoadingData(false);
+            }
+        };
+        fetchData();
+    }, [barang.id]);
 
     // Handle file selection
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,21 +146,55 @@ const DetailBarang: React.FC<DetailBarangProps> = ({ barang, onClose, onUpdate, 
             onClick={(e) => e.target === e.currentTarget && onClose()}
         >
             <div 
-                className="bg-[#1e1e1e] rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl"
+                className="bg-[#1e1e1e] w-full max-w-md max-h-[90vh] rounded-2xl overflow-hidden shadow-2xl border border-[#333] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-[#333]">
-                    <h2 className="text-lg font-bold text-white">
-                        {isEditing ? "Edit Barang" : "Detail Barang"}
-                    </h2>
-                    <button 
-                        onClick={onClose}
-                        className="w-8 h-8 rounded-full bg-[#333] hover:bg-[#444] flex items-center justify-center transition-colors"
-                    >
-                        <X className="w-4 h-4 text-white" />
-                    </button>
-                </div>
+                {/* Header with Image - When not editing */}
+                {!isEditing && (
+                    <div className="relative h-32 flex-shrink-0">
+                        {barang.gambar ? (
+                            <img 
+                                src={barang.gambar} 
+                                alt={barang.nama} 
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-[#B39135] to-[#8B7028] flex items-center justify-center">
+                                <Package className="w-12 h-12 text-white/30" />
+                            </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                        
+                        {/* Close Button */}
+                        <button 
+                            onClick={onClose}
+                            className="absolute top-3 right-3 w-8 h-8 bg-black/50 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        {/* Title */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                            <h2 className="text-white text-lg font-bold">{barang.nama}</h2>
+                            {barang.keterangan && (
+                                <p className="text-[#aaa] text-sm truncate">{barang.keterangan}</p>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Header - When editing */}
+                {isEditing && (
+                    <div className="flex items-center justify-between p-4 border-b border-[#333]">
+                        <h2 className="text-lg font-bold text-white">Edit Barang</h2>
+                        <button 
+                            onClick={onClose}
+                            className="w-8 h-8 rounded-full bg-[#333] hover:bg-[#444] flex items-center justify-center transition-colors"
+                        >
+                            <X className="w-4 h-4 text-white" />
+                        </button>
+                    </div>
+                )}
 
                 {/* Content */}
                 <div className="p-4 overflow-y-auto max-h-[calc(90vh-140px)]">
@@ -183,17 +239,17 @@ const DetailBarang: React.FC<DetailBarangProps> = ({ barang, onClose, onUpdate, 
                         </div>
                     )}
 
-                    {/* Image Section */}
-                    <div className="flex justify-center mb-4">
-                        {isEditing ? (
+                    {/* Image Section - Only when editing */}
+                    {isEditing && (
+                        <div className="flex justify-center mb-4">
                             <label className="cursor-pointer">
                                 <div className="relative">
                                     {gambarPreview ? (
-                                        <div className="w-[9rem] h-[16rem] rounded-xl overflow-hidden border-2 border-[#B39135]">
+                                        <div className="w-full h-32 rounded-xl overflow-hidden border-2 border-[#B39135]">
                                             <img src={gambarPreview} alt="Preview" className="w-full h-full object-cover" />
                                         </div>
                                     ) : (
-                                        <div className="w-[9rem] h-[16rem] bg-[#2a2a2a] rounded-xl border-2 border-dashed border-[#4f4f4f] hover:border-[#B39135] transition-colors flex flex-col items-center justify-center gap-3">
+                                        <div className="w-full h-32 bg-[#2a2a2a] rounded-xl border-2 border-dashed border-[#4f4f4f] hover:border-[#B39135] transition-colors flex flex-col items-center justify-center gap-3">
                                             <ImagePlus className="w-8 h-8 text-[#888]" />
                                             <p className="text-[#888] text-sm">Pilih Gambar</p>
                                         </div>
@@ -207,18 +263,8 @@ const DetailBarang: React.FC<DetailBarangProps> = ({ barang, onClose, onUpdate, 
                                     className="hidden"
                                 />
                             </label>
-                        ) : (
-                            <div className="w-[9rem] h-[16rem] rounded-xl overflow-hidden">
-                                {barang.gambar ? (
-                                    <img src={barang.gambar} alt={barang.nama} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-[#2a2a2a] to-[#1a1a1a] flex items-center justify-center">
-                                        <Package className="w-16 h-16 text-[#B39135]" />
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* Form Fields */}
                     {isEditing ? (
@@ -241,27 +287,77 @@ const DetailBarang: React.FC<DetailBarangProps> = ({ barang, onClose, onUpdate, 
                         </div>
                     ) : (
                         <div className="flex flex-col gap-3">
-                            <div>
-                                <p className="text-[#888] text-xs">Nama Barang</p>
-                                <p className="text-white font-bold text-lg">{barang.nama}</p>
-                            </div>
-                            {barang.keterangan && (
-                                <div>
-                                    <p className="text-[#888] text-xs">Keterangan</p>
-                                    <p className="text-white">{barang.keterangan}</p>
+                            
+                            {/* Statistics */}
+                            {isLoadingData ? (
+                                <div className="grid grid-cols-2 gap-2 mt-3">
+                                    <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl animate-pulse">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-lg bg-blue-500/20"></div>
+                                            <div className="flex-1">
+                                                <div className="h-3 bg-[#333] rounded w-16 mb-1"></div>
+                                                <div className="h-5 bg-[#333] rounded w-12"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-green-500/10 border border-green-500/20 p-3 rounded-xl animate-pulse">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-lg bg-green-500/20"></div>
+                                            <div className="flex-1">
+                                                <div className="h-3 bg-[#333] rounded w-16 mb-1"></div>
+                                                <div className="h-5 bg-[#333] rounded w-20"></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
-                            {barang.stokHarian && barang.stokHarian.length > 0 && (
+                            ) : barangData.stokHarian && barangData.stokHarian.length > 0 ? (
+                                <div className="grid grid-cols-2 gap-2 mt-3">
+                                    <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                                <Boxes className="w-4 h-4 text-blue-400" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[#888] text-xs">Total Stok Edar</p>
+                                                <p className="text-white font-bold">
+                                                    {barangData.stokHarian.length} kali
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-green-500/10 border border-green-500/20 p-3 rounded-xl">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                                                <TrendingUp className="w-4 h-4 text-green-400" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[#888] text-xs">Total Omzet</p>
+                                                <p className="text-green-400 font-bold text-sm">
+                                                    Rp {new Intl.NumberFormat('id-ID').format(
+                                                        barangData.stokHarian.reduce((total, stok) => {
+                                                            const stokOmzet = stok.detailSetor?.reduce((sum, ds) => sum + ds.totalHarga, 0) || 0;
+                                                            return total + stokOmzet;
+                                                        }, 0)
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : null}
+
+                            {/* Stok Terbaru */}
+                            {barangData.stokHarian && barangData.stokHarian.length > 0 && !isLoadingData && (
                                 <div>
                                     <p className="text-[#888] text-xs mb-2">Stok Terbaru</p>
                                     <div className="bg-[#2a2a2a] rounded-lg p-3">
                                         <div className="flex justify-between">
                                             <span className="text-[#aaa]">Jumlah:</span>
-                                            <span className="text-white font-bold">{barang.stokHarian[0].stok} pcs</span>
+                                            <span className="text-white font-bold">{barangData.stokHarian[0].stok} pcs</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-[#aaa]">Harga:</span>
-                                            <span className="text-white font-bold">Rp {barang.stokHarian[0].harga.toLocaleString('id-ID')}</span>
+                                            <span className="text-white font-bold">Rp {barangData.stokHarian[0].harga.toLocaleString('id-ID')}</span>
                                         </div>
                                     </div>
                                 </div>
