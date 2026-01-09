@@ -8,7 +8,6 @@ const UserNavbar: React.FC = () => {
     
     const menuItems = [
         { icon: Home, label: "Beranda", path: "/user" },
-        { icon: Package, label: "Ambil Stok", path: "/user/ambil-stok" },
         { icon: FileText, label: "Riwayat", path: "/user/riwayat" },
         { icon: User, label: "Profil", path: "/user/profil" },
     ];

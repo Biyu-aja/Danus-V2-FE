@@ -120,20 +120,8 @@ export const getDetailKeuanganById = asyncHandler(async (req: Request, res: Resp
 });
 
 /**
- * PATCH /api/keuangan/:id
- * Update detail keuangan
- */
-export const updateDetailKeuangan = asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id, 10);
-    const { title, nominal, keterangan } = req.body;
-
-    const updated = await keuanganService.updateDetailKeuangan(id, { title, nominal, keterangan });
-    return successResponse(res, updated, 'Transaksi berhasil diupdate');
-});
-
-/**
  * DELETE /api/keuangan/:id
- * Delete detail keuangan
+ * Delete detail keuangan (only last transaction)
  */
 export const deleteDetailKeuangan = asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params.id, 10);

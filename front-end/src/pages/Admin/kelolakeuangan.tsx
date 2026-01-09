@@ -19,10 +19,11 @@ import {
     User,
     FileSpreadsheet,
     X,
-    Menu
+    Menu,
+    DollarSign
 } from "lucide-react";
 
-type FilterType = 'semua' | 'pemasukan' | 'pengeluaran';
+type FilterType = 'semua' | 'omzet' | 'pengeluaran';
 
 const KelolaKeuangan: React.FC = () => {
     const [saldo, setSaldo] = useState<Saldo | null>(null);
@@ -114,7 +115,8 @@ const KelolaKeuangan: React.FC = () => {
     // Filtered histori
     const filteredHistori = useMemo(() => {
         if (filterType === 'semua') return histori;
-        return histori.filter(h => h.tipe === filterType.toUpperCase());
+        if (filterType === 'omzet') return histori.filter(h => h.tipe === 'PEMASUKAN');
+        return histori.filter(h => h.tipe === 'PENGELUARAN');
     }, [histori, filterType]);
 
     // Group by date
@@ -168,15 +170,15 @@ const KelolaKeuangan: React.FC = () => {
                     </p>
                 </div>
 
-                {/* Summary Cards */}
-                <div className="grid grid-cols-2 gap-3">
+                {/* Summary Cards - Omzet, Pengeluaran, Laba */}
+                <div className="grid grid-cols-3 gap-2">
                     <div className="bg-[#1e1e1e] rounded-xl p-3 border border-green-500/20">
                         <div className="flex items-center gap-2 mb-1">
                             <TrendingUp className="w-4 h-4 text-green-400" />
-                            <span className="text-[#888] text-xs">Pemasukan</span>
+                            <span className="text-[#888] text-xs">Omzet</span>
                         </div>
-                        <p className="text-green-400 text-lg font-bold">
-                            +Rp {formatRupiah(totals.pemasukan)}
+                        <p className="text-green-400 text-base font-bold">
+                            Rp {formatRupiah(totals.pemasukan)}
                         </p>
                     </div>
                     <div className="bg-[#1e1e1e] rounded-xl p-3 border border-red-500/20">
@@ -184,21 +186,30 @@ const KelolaKeuangan: React.FC = () => {
                             <TrendingDown className="w-4 h-4 text-red-400" />
                             <span className="text-[#888] text-xs">Pengeluaran</span>
                         </div>
-                        <p className="text-red-400 text-lg font-bold">
-                            -Rp {formatRupiah(totals.pengeluaran)}
+                        <p className="text-red-400 text-base font-bold">
+                            Rp {formatRupiah(totals.pengeluaran)}
+                        </p>
+                    </div>
+                    <div className={`bg-[#1e1e1e] rounded-xl p-3 border ${(totals.pemasukan - totals.pengeluaran) >= 0 ? 'border-blue-500/20' : 'border-red-500/20'}`}>
+                        <div className="flex items-center gap-2 mb-1">
+                            <DollarSign className={`w-4 h-4 ${(totals.pemasukan - totals.pengeluaran) >= 0 ? 'text-blue-400' : 'text-red-400'}`} />
+                            <span className="text-[#888] text-xs">Laba</span>
+                        </div>
+                        <p className={`text-base font-bold ${(totals.pemasukan - totals.pengeluaran) >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                            Rp {formatRupiah(totals.pemasukan - totals.pengeluaran)}
                         </p>
                     </div>
                 </div>
 
                 {/* Filter Tabs */}
                 <div className="flex gap-2">
-                    {(['semua', 'pemasukan', 'pengeluaran'] as FilterType[]).map(type => (
+                    {(['semua', 'omzet', 'pengeluaran'] as FilterType[]).map(type => (
                         <button
                             key={type}
                             onClick={() => setFilterType(type)}
                             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                                 filterType === type
-                                    ? type === 'pemasukan' 
+                                    ? type === 'omzet' 
                                         ? 'bg-green-500/20 text-green-400 border border-green-500/50'
                                         : type === 'pengeluaran'
                                             ? 'bg-red-500/20 text-red-400 border border-red-500/50'

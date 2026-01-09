@@ -196,34 +196,7 @@ export const keuanganService = {
     },
 
     /**
-     * Update detail keuangan
-     */
-    async updateDetailKeuangan(id: number, payload: {
-        title?: string;
-        nominal?: number;
-        keterangan?: string;
-    }): Promise<{ success: boolean; message: string; data?: DetailKeuangan }> {
-        try {
-            const response = await fetch(`${API_BASE_URL}/keuangan/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-            const data = await response.json();
-
-            return {
-                success: data.success,
-                message: data.message,
-                data: data.data,
-            };
-        } catch (error) {
-            console.error('Error updating detail keuangan:', error);
-            return { success: false, message: 'Terjadi kesalahan jaringan' };
-        }
-    },
-
-    /**
-     * Delete detail keuangan
+     * Delete detail keuangan (only last transaction)
      */
     async deleteDetailKeuangan(id: number): Promise<{ success: boolean; message: string }> {
         try {

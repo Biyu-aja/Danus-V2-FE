@@ -163,47 +163,17 @@ export class KeuanganService {
         if (!detail) {
             throw new ValidationError('Transaksi tidak ditemukan');
         }
-        return detail;
+
+        // Add isLastTransaction flag
+        const lastTransactionId = await keuanganRepository.getLastTransactionId();
+        return {
+            ...detail,
+            isLastTransaction: detail.id === lastTransactionId,
+        };
     }
 
     /**
-     * Update detail keuangan (only for manual entries - no detailSetorId)
-     */
-    async updateDetailKeuangan(id: number, data: { title?: string; nominal?: number; keterangan?: string }) {
-        const existing = await keuanganRepository.findById(id);
-        if (!existing) {
-            throw new ValidationError('Transaksi tidak ditemukan');
-        }
-
-        // Only allow editing manual entries (no linked detailSetor)
-        if (existing.detailSetorId !== null) {
-            throw new ValidationError('Tidak dapat mengedit transaksi dari setor barang');
-        }
-
-        // If nominal changes, need to adjust saldo
-        const nominalDiff = (data.nominal || existing.nominal) - existing.nominal;
-
-        return withTransaction(async (tx) => {
-            // Update the record
-            await keuanganRepository.updateDetailKeuangan(tx, id, data);
-
-            // Adjust saldo if nominal changed
-            if (nominalDiff !== 0) {
-                if (existing.tipe === 'PEMASUKAN') {
-                    // Pemasukan: increase = increment saldo
-                    await keuanganRepository.updateSaldo(tx, nominalDiff);
-                } else {
-                    // Pengeluaran: increase = decrement saldo
-                    await keuanganRepository.updateSaldo(tx, -nominalDiff);
-                }
-            }
-
-            return keuanganRepository.findById(id);
-        });
-    }
-
-    /**
-     * Delete detail keuangan (only for manual entries)
+     * Delete detail keuangan (only for the last transaction, and only manual entries)
      */
     async deleteDetailKeuangan(id: number) {
         const existing = await keuanganRepository.findById(id);
@@ -216,8 +186,14 @@ export class KeuanganService {
             throw new ValidationError('Tidak dapat menghapus transaksi dari setor barang');
         }
 
+        // Only allow deleting the last transaction
+        const lastTransactionId = await keuanganRepository.getLastTransactionId();
+        if (existing.id !== lastTransactionId) {
+            throw new ValidationError('Hanya transaksi terakhir yang dapat dihapus');
+        }
+
         return withTransaction(async (tx) => {
-            // Reverse the saldo effect
+            // Reverse the saldo effect directly (not by adding new transaction)
             if (existing.tipe === 'PEMASUKAN') {
                 // Reverse pemasukan = decrement saldo
                 await keuanganRepository.updateSaldo(tx, -existing.nominal);
