@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import Auth from "../pages/General/Auth";
+import Auth from "../pages/General/auth";
 import Dashboard from "../pages/Admin/MAIN-PAGE/dashboard";
 import KelolaKeuangan from "../pages/Admin/kelolakeuangan";
 import KelolaUser from "../pages/Admin/MAIN-PAGE/kelola-user";
@@ -11,80 +11,52 @@ import HistoriStokPage from "../pages/Admin/MAIN-PAGE/histori-stok";
 import HistoriStokDetailPage from "../pages/Admin/MAIN-PAGE/histori-stok-detail";
 import UserDetailStatsPage from "../pages/Admin/MAIN-PAGE/user-detail-stats";
 import UserDashboard from "../pages/User/dashboard";
-import AmbilStokPage from "../pages/User/ambil-stok";
 import RiwayatPage from "../pages/User/riwayat";
 import ProfilPage from "../pages/User/profil";
+import ProtectedRoute from "../components/ProtectedRoute";
+import { commonListed, adminListed, userListed } from "./listed";
+
+// Admin child routes - menggunakan adminListed untuk path
+const adminChildRoutes = [
+    { index: true, element: <Dashboard /> },
+    { path: adminListed.dashboard, element: <Dashboard /> },
+    { path: adminListed.kelolaUser, element: <KelolaUser /> },
+    { path: adminListed.kelolaUserDetail, element: <UserDetailStatsPage /> },
+    { path: adminListed.kelolaBarang, element: <KelolaBarang /> },
+    { path: adminListed.tambahBarang, element: <TambahBarangPage /> },
+    { path: adminListed.tambahStok, element: <TambahStokPage /> },
+    { path: adminListed.kelolaKeuangan, element: <KelolaKeuangan /> },
+    { path: adminListed.historiStok, element: <HistoriStokPage /> },
+    { path: adminListed.detailStok, element: <HistoriStokDetailPage /> },
+    { path: adminListed.statusUser, element: <StatusUserPage /> },
+];
+
+// User child routes - menggunakan userListed untuk path
+const userChildRoutes = [
+    { index: true, element: <UserDashboard /> },
+    { path: userListed.dashboard, element: <UserDashboard /> },
+    { path: userListed.riwayat, element: <RiwayatPage /> },
+    { path: userListed.profil, element: <ProfilPage /> },
+];
 
 const Routes = createBrowserRouter([
+    // Auth route (tanpa login)
     {
-        path : "/",
-        element  : <Auth />
+        path: commonListed.auth,
+        element: <Auth />
     },
+    // Admin Routes - Hanya bisa diakses oleh admin
     {
-        path: "/admin/",
-        element : <Dashboard />
+        path: "/admin",
+        element: <ProtectedRoute allowedRoles={['admin']} />,
+        children: adminChildRoutes,
     },
-    {
-        path: "/admin/dashboard",
-        element : <Dashboard />
-    },
-    {
-        path: "/admin/kelola-keuangan",
-        element : <KelolaKeuangan />
-    },
-    {
-        path: "/admin/kelola-barang",
-        element : <KelolaBarang />
-    },
-    {
-        path: "/admin/kelola-barang/tambah-barang",
-        element : <TambahBarangPage />
-    },
-    {
-        path: "/admin/kelola-barang/tambah-stok",
-        element : <TambahStokPage />
-    },
-    {
-        path: "/admin/histori-stok",
-        element: <HistoriStokPage />
-    },
-    {
-        path: "/admin/detail-stok/:id",
-        element: <HistoriStokDetailPage />
-    },
-    {
-        path: "/admin/kelola-user",
-        element : <KelolaUser />
-    },
-    {
-        path: "/admin/kelola-user/:id",
-        element: <UserDetailStatsPage />
-    },
-    {
-        path: "/admin/status-user",
-        element: <StatusUserPage />
-    },
-    // User Routes
+    // User Routes - Hanya bisa diakses oleh user biasa
     {
         path: "/user",
-        element: <UserDashboard />
+        element: <ProtectedRoute allowedRoles={['user']} />,
+        children: userChildRoutes,
     },
-    {
-        path: "/user/dashboard",
-        element: <UserDashboard />
-    },
-    {
-        path: "/user/ambil-stok",
-        element: <AmbilStokPage />
-    },
-    {
-        path: "/user/riwayat",
-        element: <RiwayatPage />
-    },
-    {
-        path: "/user/profil",
-        element: <ProfilPage />
-    },
-])
+]);
 
-export default Routes
+export default Routes;

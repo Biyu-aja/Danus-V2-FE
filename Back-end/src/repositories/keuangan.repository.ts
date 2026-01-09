@@ -282,21 +282,14 @@ export class KeuanganRepository {
     }
 
     /**
-     * Update detail keuangan (for manual entries only)
+     * Get the ID of the last (most recent) transaction
      */
-    async updateDetailKeuangan(
-        tx: TransactionClient,
-        id: number,
-        data: {
-            title?: string;
-            nominal?: number;
-            keterangan?: string;
-        }
-    ) {
-        return tx.detailKeuangan.update({
-            where: { id },
-            data,
+    async getLastTransactionId() {
+        const last = await prisma.detailKeuangan.findFirst({
+            orderBy: { createdAt: 'desc' },
+            select: { id: true },
         });
+        return last?.id || null;
     }
 
     /**

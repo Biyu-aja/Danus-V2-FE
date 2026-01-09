@@ -5,12 +5,11 @@ import {
     TrendingDown,
     Calendar,
     User,
-    Edit3, 
     Trash2, 
     Loader2, 
     AlertCircle,
-    Check,
-    Package
+    Package,
+    Info
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { keuanganService } from "../../../services/keuangan.service";
@@ -23,8 +22,9 @@ interface KeuanganDetailModalProps {
     onSuccess?: () => void;
 }
 
-// Extended type to include detailSetor info from backend
+// Extended type to include detailSetor info and isLastTransaction from backend
 interface DetailKeuanganFull extends DetailKeuangan {
+    isLastTransaction?: boolean;
     detailSetor?: {
         id: number;
         qty: number;
@@ -57,13 +57,6 @@ const KeuanganDetailModal: React.FC<KeuanganDetailModalProps> = ({
     const [detail, setDetail] = useState<DetailKeuanganFull | null>(null);
     const [error, setError] = useState<string | null>(null);
     
-    // Edit mode
-    const [isEditing, setIsEditing] = useState(false);
-    const [editTitle, setEditTitle] = useState("");
-    const [editNominal, setEditNominal] = useState(0);
-    const [editKeterangan, setEditKeterangan] = useState("");
-    const [saving, setSaving] = useState(false);
-    
     // Delete confirmation
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -80,13 +73,11 @@ const KeuanganDetailModal: React.FC<KeuanganDetailModalProps> = ({
         
         setLoading(true);
         setError(null);
+        setShowDeleteConfirm(false);
         try {
             const data = await keuanganService.getDetailKeuanganById(transaksi.id);
             if (data) {
                 setDetail(data as DetailKeuanganFull);
-                setEditTitle(data.title);
-                setEditNominal(data.nominal);
-                setEditKeterangan(data.keterangan || "");
             } else {
                 setError('Gagal memuat data');
             }
@@ -122,35 +113,10 @@ const KeuanganDetailModal: React.FC<KeuanganDetailModalProps> = ({
         return phone.replace(/^0/, '62').replace(/[^0-9]/g, '');
     };
 
-    // Check if transaction can be edited/deleted (only manual entries)
-    const canModify = detail && detail.detailSetorId === null;
-
-    // Handle save edit
-    const handleSaveEdit = async () => {
-        if (!detail) return;
-        
-        setSaving(true);
-        setError(null);
-        try {
-            const response = await keuanganService.updateDetailKeuangan(detail.id, {
-                title: editTitle,
-                nominal: editNominal,
-                keterangan: editKeterangan || undefined,
-            });
-            if (response.success) {
-                setIsEditing(false);
-                fetchDetail();
-                if (onSuccess) onSuccess();
-            } else {
-                setError(response.message);
-            }
-        } catch (err) {
-            console.error('Error updating:', err);
-            setError('Terjadi kesalahan');
-        } finally {
-            setSaving(false);
-        }
-    };
+    // Check if transaction can be deleted:
+    // - Only manual entries (no detailSetorId)
+    // - Only the last transaction
+    const canDelete = detail && detail.detailSetorId === null && detail.isLastTransaction === true;
 
     // Handle delete
     const handleDelete = async () => {
@@ -175,7 +141,6 @@ const KeuanganDetailModal: React.FC<KeuanganDetailModalProps> = ({
     };
 
     const handleClose = () => {
-        setIsEditing(false);
         setShowDeleteConfirm(false);
         setError(null);
         onClose();
@@ -236,7 +201,7 @@ const KeuanganDetailModal: React.FC<KeuanganDetailModalProps> = ({
                             )}
 
                             {/* Type Badge */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
                                     isPemasukan 
                                         ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
@@ -247,53 +212,23 @@ const KeuanganDetailModal: React.FC<KeuanganDetailModalProps> = ({
                                     ) : (
                                         <TrendingDown className="w-4 h-4" />
                                     )}
-                                    {detail.tipe}
+                                    {isPemasukan ? 'OMZET' : 'PENGELUARAN'}
                                 </span>
-                                {!canModify && (
+                                {detail.detailSetorId !== null && (
                                     <span className="text-[#888] text-xs">(Dari setor barang)</span>
+                                )}
+                                {detail.isLastTransaction && detail.detailSetorId === null && (
+                                    <span className="text-[#B09331] text-xs">(Dapat dihapus)</span>
                                 )}
                             </div>
 
                             {/* Title & Nominal */}
-                            {isEditing ? (
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="text-[#888] text-sm mb-1 block">Judul</label>
-                                        <input
-                                            type="text"
-                                            value={editTitle}
-                                            onChange={(e) => setEditTitle(e.target.value)}
-                                            className="w-full bg-[#252525] text-white border border-[#444] rounded-xl p-3 focus:border-[#B09331] focus:outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-[#888] text-sm mb-1 block">Nominal</label>
-                                        <input
-                                            type="number"
-                                            value={editNominal}
-                                            onChange={(e) => setEditNominal(parseInt(e.target.value) || 0)}
-                                            className="w-full bg-[#252525] text-white border border-[#444] rounded-xl p-3 focus:border-[#B09331] focus:outline-none"
-                                            min={1}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-[#888] text-sm mb-1 block">Keterangan</label>
-                                        <textarea
-                                            value={editKeterangan}
-                                            onChange={(e) => setEditKeterangan(e.target.value)}
-                                            className="w-full bg-[#252525] text-white border border-[#444] rounded-xl p-3 focus:border-[#B09331] focus:outline-none resize-none h-20"
-                                            placeholder="Opsional..."
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="bg-[#252525] rounded-xl p-4">
-                                    <h3 className="text-white font-bold text-lg mb-2">{detail.title}</h3>
-                                    <p className={`text-2xl font-bold ${isPemasukan ? 'text-green-400' : 'text-red-400'}`}>
-                                        {isPemasukan ? '+' : '-'}Rp {formatRupiah(detail.nominal)}
-                                    </p>
-                                </div>
-                            )}
+                            <div className="bg-[#252525] rounded-xl p-4">
+                                <h3 className="text-white font-bold text-lg mb-2">{detail.title}</h3>
+                                <p className={`text-2xl font-bold ${isPemasukan ? 'text-green-400' : 'text-red-400'}`}>
+                                    {isPemasukan ? '+' : '-'}Rp {formatRupiah(detail.nominal)}
+                                </p>
+                            </div>
 
                             {/* Time Info */}
                             <div className="flex items-center gap-2 text-[#888] text-sm">
@@ -359,10 +294,20 @@ const KeuanganDetailModal: React.FC<KeuanganDetailModalProps> = ({
                             )}
 
                             {/* Keterangan */}
-                            {!isEditing && detail.keterangan && (
+                            {detail.keterangan && (
                                 <div className="bg-[#252525] rounded-xl p-4">
                                     <p className="text-[#888] text-sm mb-1">Keterangan</p>
                                     <p className="text-white">{detail.keterangan}</p>
+                                </div>
+                            )}
+
+                            {/* Info why can't delete */}
+                            {detail.detailSetorId === null && !detail.isLastTransaction && (
+                                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 flex items-start gap-2">
+                                    <Info className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                                    <p className="text-yellow-400 text-sm">
+                                        Hanya transaksi terakhir yang dapat dihapus demi keamanan data
+                                    </p>
                                 </div>
                             )}
 
@@ -409,65 +354,20 @@ const KeuanganDetailModal: React.FC<KeuanganDetailModalProps> = ({
                 {detail && !loading && (
                     <div className="p-4 border-t border-[#333] bg-[#1a1a1a]">
                         <div className="flex gap-2">
-                            {isEditing ? (
-                                <>
-                                    <button
-                                        onClick={() => {
-                                            setIsEditing(false);
-                                            setEditTitle(detail.title);
-                                            setEditNominal(detail.nominal);
-                                            setEditKeterangan(detail.keterangan || "");
-                                        }}
-                                        disabled={saving}
-                                        className="flex-1 bg-[#333] text-white font-medium py-3 rounded-xl hover:bg-[#444] transition-colors disabled:opacity-50"
-                                    >
-                                        Batal
-                                    </button>
-                                    <button
-                                        onClick={handleSaveEdit}
-                                        disabled={saving || !editTitle || editNominal <= 0}
-                                        className="flex-1 bg-[#B09331] text-white font-semibold py-3 rounded-xl hover:bg-[#C4A73B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                    >
-                                        {saving ? (
-                                            <>
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                                Menyimpan...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Check className="w-4 h-4" />
-                                                Simpan
-                                            </>
-                                        )}
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    {canModify && !showDeleteConfirm && (
-                                        <>
-                                            <button
-                                                onClick={() => setShowDeleteConfirm(true)}
-                                                className="w-12 bg-red-600/20 text-red-400 font-medium py-3 rounded-xl hover:bg-red-600/30 transition-colors flex items-center justify-center"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => setIsEditing(true)}
-                                                className="flex-1 bg-[#333] text-white font-medium py-3 rounded-xl hover:bg-[#444] transition-colors flex items-center justify-center gap-2"
-                                            >
-                                                <Edit3 className="w-4 h-4" />
-                                                Edit
-                                            </button>
-                                        </>
-                                    )}
-                                    <button
-                                        onClick={handleClose}
-                                        className="flex-1 bg-[#B09331] text-white font-semibold py-3 rounded-xl hover:bg-[#C4A73B] transition-colors"
-                                    >
-                                        Tutup
-                                    </button>
-                                </>
+                            {canDelete && !showDeleteConfirm && (
+                                <button
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="w-12 bg-red-600/20 text-red-400 font-medium py-3 rounded-xl hover:bg-red-600/30 transition-colors flex items-center justify-center"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
                             )}
+                            <button
+                                onClick={handleClose}
+                                className="flex-1 bg-[#B09331] text-white font-semibold py-3 rounded-xl hover:bg-[#C4A73B] transition-colors"
+                            >
+                                Tutup
+                            </button>
                         </div>
                     </div>
                 )}

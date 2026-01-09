@@ -8,7 +8,6 @@ import {
     getLaporanHarian,
     getLaporanBulanan,
     getDetailKeuanganById,
-    updateDetailKeuangan,
     deleteDetailKeuangan,
 } from '../controllers/keuangan.controller';
 
@@ -63,14 +62,8 @@ router.get('/laporan/bulanan', getLaporanBulanan);
 router.get('/:id', getDetailKeuanganById);
 
 /**
- * @route PATCH /api/keuangan/:id
- * @desc Update detail keuangan
- */
-router.patch('/:id', updateDetailKeuangan);
-
-/**
  * @route DELETE /api/keuangan/:id
- * @desc Delete detail keuangan
+ * @desc Delete detail keuangan (only last transaction)
  */
 router.delete('/:id', deleteDetailKeuangan);
 

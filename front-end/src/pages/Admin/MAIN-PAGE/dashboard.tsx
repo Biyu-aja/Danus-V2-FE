@@ -13,7 +13,8 @@ import {
     Package, 
     CheckCircle,
     ChevronRight,
-    Calendar
+    Calendar,
+    DollarSign
 } from "lucide-react";
 import StokCard from "../../../components/general/stokcard";
 import TitleAdd from "../../../components/general/title-add";
@@ -97,21 +98,28 @@ const Dashboard: React.FC = () => {
                 {/* Total Saldo */}
                 <Total_Saldo saldo={saldo?.totalSaldo} isLoading={loadingSaldo} />
                 
-                {/* Pemasukan & Pengeluaran Hari Ini */}
-                <div className="grid grid-cols-2 gap-3">
+                {/* Omzet, Pengeluaran & Laba Hari Ini */}
+                <div className="grid grid-cols-3 gap-2">
                     <CardItem 
-                        label="Pemasukan Hari Ini" 
+                        label="Omzet" 
                         value={loadingLaporan ? "..." : formatRupiah(laporan?.pemasukan.total || 0)}
                         icon={TrendingUp}
                         variant="income"
-                        prefix="+Rp "
+                        prefix="Rp "
                     />
                     <CardItem 
-                        label="Pengeluaran Hari Ini" 
+                        label="Pengeluaran" 
                         value={loadingLaporan ? "..." : formatRupiah(laporan?.pengeluaran.total || 0)}
                         icon={TrendingDown}
                         variant="expense"
-                        prefix="-Rp "
+                        prefix="Rp "
+                    />
+                    <CardItem 
+                        label="Laba" 
+                        value={loadingLaporan ? "..." : formatRupiah((laporan?.pemasukan.total || 0) - (laporan?.pengeluaran.total || 0))}
+                        icon={DollarSign}
+                        variant={(laporan?.selisih || 0) >= 0 ? "info" : "expense"}
+                        prefix="Rp "
                     />
                 </div>
                 
