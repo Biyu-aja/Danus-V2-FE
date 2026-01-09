@@ -5,6 +5,7 @@ export interface Barang {
     nama: string;
     keterangan?: string;
     gambar?: string;
+    deletedAt?: string | null; // Soft delete - null berarti aktif
     stokHarian?: StokHarian[];
 }
 
@@ -19,6 +20,16 @@ export interface StokHarian {
     keterangan?: string;
     tanggalEdar: string;
     barang?: Barang;
+    detailSetor?: DetailSetor[]; // Untuk statistik
+}
+
+export interface DetailSetor {
+    id: number;
+    ambilBarangId: number;
+    stokHarianId: number;
+    qty: number;
+    totalHarga: number;
+    tanggalSetor?: string | null;
 }
 
 export interface CreateBarangRequest {

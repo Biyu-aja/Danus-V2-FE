@@ -10,7 +10,7 @@ import DetailBarang from "../../../components/admin/kelola-barang/detail-barang"
 import DetailStokModal from "../../../components/admin/kelola-barang/detail-stok-modal";
 import { barangService, stokService } from "../../../services/barang.service";
 import type { Barang, StokHarian } from "../../../types/barang.types";
-import { Loader2, Package, Boxes, History, Plus } from "lucide-react";
+import { Loader2, Package, Boxes, History, Plus, HistoryIcon } from "lucide-react";
 
 const KelolaBarang: React.FC = () => {
     const navigate = useNavigate();
@@ -198,7 +198,16 @@ const KelolaBarang: React.FC = () => {
 
                 {/* Jenis Barang Section */}
                 <div className="flex flex-col gap-2">
-                    <p className="text-lg font-bold">Jenis Barang</p>
+                    <div className="flex items-center justify-between">
+                        <p className="text-lg font-bold">Jenis Barang</p>
+                        <button 
+                            onClick={() => navigate('/admin/semua-barang')}
+                            className="flex gap-2 items-center text-[#B09331] hover:underline text-sm"
+                        >
+                            <HistoryIcon className="w-4 h-4"/>
+                            <span>Lihat Semua Barang</span>
+                        </button>
+                    </div>
                     {isLoadingBarang ? (
                         <div className="flex items-center justify-center h-[16rem] bg-[#1e1e1e] rounded-xl">
                             <div className="flex flex-col items-center gap-2 text-[#888]">

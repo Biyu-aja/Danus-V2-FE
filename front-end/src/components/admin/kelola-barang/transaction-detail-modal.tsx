@@ -295,17 +295,17 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                                         <span className="text-white font-medium">{detail.ambilBarang.user.nama_lengkap}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-[#888]">Username</span>
-                                        <span className="text-white">@{detail.ambilBarang.user.username}</span>
+                                        <span className="text-[#888]">Setor Kepada</span>
+                                        <span className="text-white">{detail.ambilBarang.setorKepada.nama_lengkap}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-[#888]">Tanggal Ambil</span>
-                                        <span className="text-white">{formatTime(detail.ambilBarang.tanggalAmbil)}</span>
+                                        <span className="text-white">{formatTanggal(detail.ambilBarang.tanggalAmbil)} {formatTime(detail.ambilBarang.tanggalAmbil)}</span>
                                     </div>
                                     {detail.tanggalSetor && (
                                         <div className="flex justify-between">
                                             <span className="text-[#888]">Tanggal Setor</span>
-                                            <span className="text-green-400">{formatTime(detail.tanggalSetor)}</span>
+                                            <span className="text-green-400">{formatTanggal(detail.tanggalSetor)} {formatTime(detail.tanggalSetor)}</span>
                                         </div>
                                     )}
                                 </div>

@@ -11,7 +11,8 @@ import {
     Activity,
     CheckCircle,
     Calendar,
-    ChevronLeft
+    ChevronLeft,
+    PhoneIcon
 } from "lucide-react";
 import { authService } from "../../services/auth.service";
 import { userService, type UserStats, type CalendarDay } from "../../services/user.service";
@@ -166,9 +167,7 @@ const ProfilPage: React.FC = () => {
                                 {currentUser?.nama_lengkap || 'User'}
                             </h2>
                             <p className="text-[#888] text-sm">@{currentUser?.username}</p>
-                            <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[#B09331]/20 text-[#B09331] capitalize">
-                                {currentUser?.role}
-                            </span>
+                            <span className="flex items-center gap-2 text-sm"><PhoneIcon className="w-4 h-4 text-[#B09331]"/>{currentUser?.nomor_telepon}</span>
                         </div>
                     </div>
                 </div>
@@ -262,35 +261,6 @@ const ProfilPage: React.FC = () => {
                             </div>
                         </>
                     )}
-                </div>
-
-                {/* Info Section */}
-                <div className="bg-[#1e1e1e] rounded-xl border border-[#333] overflow-hidden">
-                    <div className="p-4 border-b border-[#333]">
-                        <h3 className="text-white font-semibold">Informasi Akun</h3>
-                    </div>
-                    
-                    <div className="divide-y divide-[#333]">
-                        <div className="flex items-center gap-3 p-4">
-                            <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                                <User className="w-5 h-5 text-blue-400" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-[#888] text-xs">Nama Lengkap</p>
-                                <p className="text-white font-medium">{currentUser?.nama_lengkap}</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-3 p-4">
-                            <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                                <Phone className="w-5 h-5 text-green-400" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-[#888] text-xs">Nomor Telepon</p>
-                                <p className="text-white font-medium">{currentUser?.nomor_telepon}</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Catatan */}

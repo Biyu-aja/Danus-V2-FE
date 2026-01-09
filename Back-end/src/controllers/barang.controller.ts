@@ -14,6 +14,15 @@ export const getAllBarang = asyncHandler(async (req: Request, res: Response) => 
 });
 
 /**
+ * GET /api/barang/with-deleted
+ * Get all barang termasuk yang sudah dihapus (untuk filter histori)
+ */
+export const getAllBarangWithDeleted = asyncHandler(async (req: Request, res: Response) => {
+    const barang = await barangService.getAllBarangWithDeleted();
+    return successResponse(res, barang, 'Berhasil mendapatkan data barang');
+});
+
+/**
  * GET /api/barang/:id
  * Get barang by ID
  */
@@ -59,4 +68,14 @@ export const deleteBarang = asyncHandler(async (req: Request, res: Response) => 
     const id = parseInt(req.params.id, 10);
     await barangService.deleteBarang(id);
     return successResponse(res, null, 'Berhasil menghapus barang');
+});
+
+/**
+ * PATCH /api/barang/:id/restore
+ * Restore barang yang sudah dihapus
+ */
+export const restoreBarang = asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    const barang = await barangService.restoreBarang(id);
+    return successResponse(res, barang, 'Berhasil mengembalikan barang');
 });
