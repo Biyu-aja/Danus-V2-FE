@@ -78,7 +78,8 @@ const ProfilPage: React.FC = () => {
         let totalHariKerja = 0;
 
         stats.calendar.forEach(day => {
-            if (day.status !== 'ABU') totalHariKerja++;
+            // Exclude ABU (weekend) and HITAM (no danus) from work days
+            if (day.status !== 'ABU' && day.status !== 'HITAM') totalHariKerja++;
             if (day.status === 'HIJAU' || day.status === 'KUNING') {
                 totalHadir++;
                 if (day.detail?.totalAmbil) totalAmbil += day.detail.totalAmbil;
@@ -133,6 +134,10 @@ const ProfilPage: React.FC = () => {
                         case 'ABU':
                             bgClass = "bg-[#1a1a1a]";
                             textColor = "text-[#444]";
+                            break;
+                        case 'HITAM':
+                            bgClass = "bg-[#0a0a0a]";
+                            textColor = "text-[#333]";
                             break;
                     }
 
@@ -256,6 +261,10 @@ const ProfilPage: React.FC = () => {
                                     <div className="flex items-center gap-1">
                                         <div className="w-2.5 h-2.5 rounded-full bg-gray-500"></div>
                                         <span className="text-[#888] text-[10px]">Libur</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-[#1a1a1a] border border-[#333]"></div>
+                                        <span className="text-[#888] text-[10px]">Tidak Ada Danus</span>
                                     </div>
                                 </div>
                             </div>

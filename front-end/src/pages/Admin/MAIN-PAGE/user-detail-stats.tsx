@@ -113,12 +113,18 @@ const UserDetailStatsPage: React.FC = () => {
                             statusColor = "text-gray-500";
                             cursorClass = "cursor-pointer hover:brightness-110";
                             break;
+                        case 'HITAM':
+                            bgClass = "bg-[#0a0a0a] border-[#222]";
+                            statusColor = "text-[#444]";
+                            cursorClass = "cursor-default";
+                            break;
                     }
 
                     return (
                         <div 
                             key={day.date} 
                             onClick={() => {
+                                if (day.status === 'HITAM') return; // No action for days without stock
                                 setSelectedDetailDate(new Date(day.date));
                                 setShowDetailModal(true);
                             }}
@@ -194,7 +200,8 @@ const UserDetailStatsPage: React.FC = () => {
                             let totalHariKerja = 0;
 
                             stats.calendar.forEach(day => {
-                                if (day.status !== 'ABU') totalHariKerja++;
+                                // Exclude ABU (weekend) and HITAM (no danus) from work days
+                                if (day.status !== 'ABU' && day.status !== 'HITAM') totalHariKerja++;
                                 if (day.status === 'HIJAU' || day.status === 'KUNING') {
                                     totalHadir++;
                                     if (day.detail?.totalAmbil) totalAmbil += day.detail.totalAmbil;
@@ -285,6 +292,10 @@ const UserDetailStatsPage: React.FC = () => {
                                 <div className="flex items-center gap-2">
                                     <div className="w-3 h-3 rounded-full bg-gray-500"></div>
                                     <span className="text-[#888] text-xs">Libur / Weekend</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-[#1a1a1a] border border-[#333]"></div>
+                                    <span className="text-[#888] text-xs">Tidak Ada Danus</span>
                                 </div>
                             </div>
                         </div>

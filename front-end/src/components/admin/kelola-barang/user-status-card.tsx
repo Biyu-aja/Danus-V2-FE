@@ -73,40 +73,26 @@ const UserStatusCard: React.FC<UserStatusCardProps> = ({
                 className="bg-[#1e1e1e] rounded-xl border border-[#333] overflow-hidden hover:border-[#B09331]/50 transition-all cursor-pointer group"
             >
                 <div className="p-4">
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex flex-col gap-1">
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-1 justify-between">
                                 <h3 className="text-white font-semibold truncate">
                                     {user.nama_lengkap}
                                 </h3>
                                 <StatusBadge status={user.status} />
                             </div>
-                            <div className="flex items-center gap-1 mt-1 text-[#ffffff] text-xs">
-                                <a 
-                                    href={`https://wa.me/${formatWhatsAppNumber(user.nomor_telepon)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={handleWhatsAppClick}
-                                    className="bg-[#B09331] px-2 py-1 rounded-full flex items-center gap-1 hover:bg-[#C4A73B] transition-colors"
-                                >
-                                    <Phone className="w-3 h-3" />
-                                    {user.nomor_telepon}
-                                </a>
-                            </div>
                         </div>
 
-                        <div className="text-right flex-shrink-0 flex items-center gap-3">
-                            {user.status !== 'BELUM_AMBIL' && (
-                                <div>
-                                    <div className="flex flex-row items-center gap-1">
-                                        <p className="text-[#ffffff] text-xs">Item diambil: {user.totalAmbil}</p>
-                                    </div>
-                                    <p className="text-[#B09331] text-sm font-semibold mt-1">
-                                        Rp {formatRupiah(user.totalHarusSetor)}
-                                    </p>
+                        {user.status !== 'BELUM_AMBIL' && (
+                            <div className="flex flex-row justify-between items-center">
+                                <div className="flex flex-row items-center gap-1">
+                                    <p className="text-[#ffffff] text-sm">Item diambil: {user.totalAmbil}</p>
                                 </div>
-                            )}
-                        </div>
+                                <p className="text-[#B09331] text-sm font-semibold mt-1">
+                                    Total Setor: Rp{formatRupiah(user.totalHarusSetor)}
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Progress Bar */}

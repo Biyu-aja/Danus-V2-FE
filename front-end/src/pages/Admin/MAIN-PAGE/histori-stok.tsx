@@ -247,9 +247,9 @@ const HistoriStokPage: React.FC = () => {
                 )}
 
                 {/* Summary */}
-                <div className="bg-[#1e1e1e] rounded-xl border border-[#333] p-3 flex items-center justify-between">
-                    <span className="text-[#888] text-sm">Total Record</span>
-                    <span className="text-white font-bold">{stokList.length}</span>
+                <div className="flex items-center gap-3">
+                    <span className="text-[#888] text-sm">Total Record:</span>
+                    <span className="text-white font-medium">{stokList.length}</span>
                 </div>
 
                 {/* Content */}

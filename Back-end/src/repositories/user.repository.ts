@@ -134,6 +134,25 @@ export class UserRepository {
             orderBy: { nama_lengkap: 'asc' },
         });
     }
+
+    /**
+     * Get dates that have stok harian in a range
+     */
+    async findStokDatesInRange(startDate: Date, endDate: Date): Promise<Date[]> {
+        const stoks = await prisma.stokHarian.findMany({
+            where: {
+                tanggalEdar: {
+                    gte: startDate,
+                    lt: endDate,
+                },
+            },
+            select: {
+                tanggalEdar: true,
+            },
+        });
+
+        return stoks.map(s => s.tanggalEdar);
+    }
 }
 
 export const userRepository = new UserRepository();

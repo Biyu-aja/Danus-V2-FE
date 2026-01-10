@@ -107,11 +107,23 @@ export class UserService {
         const startDate = new Date(year, month - 1, 1);
         const endDate = new Date(year, month, 1);
 
-        const transactions = await userRepository.findUserTransactionsInRange(userId, startDate, endDate);
+        // Get user transactions and stok dates in parallel
+        const [transactions, stokDates] = await Promise.all([
+            userRepository.findUserTransactionsInRange(userId, startDate, endDate),
+            userRepository.findStokDatesInRange(startDate, endDate),
+        ]);
+
+        // Create a Set of dates that have stok (for quick lookup)
+        const stokDateSet = new Set(
+            stokDates.map(d => {
+                const date = new Date(d);
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            })
+        );
 
         // Prepare calendar data
         const daysInMonth = new Date(year, month, 0).getDate();
-        const calendar: { date: string; status: 'HIJAU' | 'KUNING' | 'MERAH' | 'ABU'; detail?: any }[] = [];
+        const calendar: { date: string; status: 'HIJAU' | 'KUNING' | 'MERAH' | 'ABU' | 'HITAM'; detail?: any }[] = [];
 
         for (let day = 1; day <= daysInMonth; day++) {
             const currentDate = new Date(year, month - 1, day);
@@ -119,11 +131,14 @@ export class UserService {
             const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 6 = Saturday
 
-            let status: 'HIJAU' | 'KUNING' | 'MERAH' | 'ABU';
+            let status: 'HIJAU' | 'KUNING' | 'MERAH' | 'ABU' | 'HITAM';
 
             // Default to gray for weekends
             if (dayOfWeek === 0 || dayOfWeek === 6) {
                 status = 'ABU';
+            } else if (!stokDateSet.has(dateString)) {
+                // No stok distributed on this day - HITAM
+                status = 'HITAM';
             } else {
                 status = 'MERAH'; // Default to did not take
             }
