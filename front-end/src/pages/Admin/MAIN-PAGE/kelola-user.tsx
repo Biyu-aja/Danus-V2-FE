@@ -81,18 +81,6 @@ const KelolaUser: React.FC = () => {
                     />
                 </div>
 
-                <div className="flex flex-row gap-2 items-center">
-                    <p className="text-[1rem] font-medium text-[#888]">Urutkan:</p>
-                    <select 
-                        className="bg-[#1e1e1e] p-2 rounded-lg border border-[#333] text-white outline-none focus:border-[#B09331]"
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                    >
-                        {dropdown.map((data, index) => (
-                            <option key={index} value={data.value}>{data.Menu}</option>
-                        ))}
-                    </select>
-                </div>
 
                 {loading ? (
                     <div className="flex items-center justify-center h-[20rem]">

@@ -29,7 +29,7 @@ export interface UserWithStatus extends User {
 
 export interface CalendarDay {
     date: string;
-    status: 'HIJAU' | 'KUNING' | 'MERAH' | 'ABU';
+    status: 'HIJAU' | 'KUNING' | 'MERAH' | 'ABU' | 'HITAM';
     detail?: {
         count: number;
         totalAmbil: number;

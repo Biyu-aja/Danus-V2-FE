@@ -128,11 +128,11 @@ const KelolaBarang: React.FC = () => {
         <div className="flex flex-col min-h-screen bg-[#121212]">
             <Header />
             <main className="flex flex-col mt-[3.5rem] gap-4 p-3 mb-[4rem]">
-                <SearchBar 
+                {/* <SearchBar 
                     placeholder="Cari Barang/Stok" 
                     value={searchQuery}
                     onChange={setSearchQuery}
-                />
+                /> */}
 
                 {/* Stok Hari Ini Section */}
                 <div className="flex flex-col gap-2">
