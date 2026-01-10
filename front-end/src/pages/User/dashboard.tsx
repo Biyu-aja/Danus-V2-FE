@@ -95,7 +95,7 @@ const UserDashboard: React.FC = () => {
             // In a real app, this should be configurable or fetched
             const response = await ambilBarangService.createAmbilBarang({
                 userId: currentUser.id,
-                setorKepadaId: 1, // Default admin ID
+                setorKepadaId: null, // Akan diupdate saat setor
                 items: [{ stokHarianId, qty }],
             });
 

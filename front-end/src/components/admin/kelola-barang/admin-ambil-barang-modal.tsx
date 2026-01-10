@@ -18,7 +18,6 @@ interface AdminAmbilBarangModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
-    adminId: number; // ID admin yang sedang login
 }
 
 interface SelectedItem {
@@ -32,8 +31,7 @@ interface SelectedItem {
 const AdminAmbilBarangModal: React.FC<AdminAmbilBarangModalProps> = ({ 
     isOpen, 
     onClose, 
-    onSuccess,
-    adminId 
+    onSuccess
 }) => {
     const [users, setUsers] = useState<User[]>([]);
     const [stokHariIni, setStokHariIni] = useState<StokHarian[]>([]);
@@ -149,7 +147,7 @@ const AdminAmbilBarangModal: React.FC<AdminAmbilBarangModalProps> = ({
         try {
             const response = await ambilBarangService.createAmbilBarang({
                 userId: selectedUserId,
-                setorKepadaId: adminId,
+                setorKepadaId: null, // Akan diupdate saat setor
                 keterangan: keterangan || `Diinput oleh admin`,
                 items: selectedItems.map(item => ({
                     stokHarianId: item.stokHarianId,

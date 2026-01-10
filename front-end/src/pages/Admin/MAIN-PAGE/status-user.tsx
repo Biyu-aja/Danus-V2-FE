@@ -451,7 +451,6 @@ const StatusUserPage: React.FC = () => {
                 isOpen={showAdminAmbilModal}
                 onClose={() => setShowAdminAmbilModal(false)}
                 onSuccess={refreshData}
-                adminId={1}
             />
         </div>
     );

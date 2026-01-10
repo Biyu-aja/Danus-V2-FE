@@ -9,7 +9,7 @@ export interface AmbilBarangItem {
 
 export interface CreateAmbilBarangRequest {
     userId: number;
-    setorKepadaId: number;
+    setorKepadaId: number | null;
     keterangan?: string;
     items: AmbilBarangItem[];
 }
@@ -35,7 +35,7 @@ export interface DetailSetor {
 export interface AmbilBarang {
     id: number;
     userId: number;
-    setorKepadaId: number;
+    setorKepadaId: number | null;
     status: 'BELUM_SETOR' | 'SUDAH_SETOR';
     keterangan?: string;
     tanggalAmbil: string;

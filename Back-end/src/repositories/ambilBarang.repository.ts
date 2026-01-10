@@ -9,7 +9,7 @@ export class AmbilBarangRepository {
         tx: TransactionClient,
         data: {
             userId: number;
-            setorKepadaId: number;
+            setorKepadaId?: number | null;
             keterangan?: string;
             items: {
                 stokHarianId: number;

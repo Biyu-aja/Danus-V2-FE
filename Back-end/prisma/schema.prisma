@@ -46,13 +46,13 @@ model StokHarian {
 model AmbilBarang {
   id            Int      @id @default(autoincrement())
   userId        Int
-  setorKepadaId Int
+  setorKepadaId Int?
   status        String   @default("BELUM_SETOR")
   keterangan    String?  @db.Text
   tanggalAmbil  DateTime @default(now())
 
-  user        User @relation("UserAmbil", fields: [userId], references: [id])
-  setorKepada User @relation("AdminSetor", fields: [setorKepadaId], references: [id])
+  user        User  @relation("UserAmbil", fields: [userId], references: [id])
+  setorKepada User? @relation("AdminSetor", fields: [setorKepadaId], references: [id])
 
   detailSetor DetailSetor[]
 }
