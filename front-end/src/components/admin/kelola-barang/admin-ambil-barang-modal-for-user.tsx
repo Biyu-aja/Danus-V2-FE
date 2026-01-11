@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { stokService } from "../../../services/barang.service";
 import { ambilBarangService } from "../../../services/ambilBarang.service";
-import { userService, type User as UserType } from "../../../services/user.service";
 import type { StokHarian } from "../../../types/barang.types";
 
 interface AdminAmbilBarangModalForUserProps {
@@ -39,8 +38,6 @@ const AdminAmbilBarangModalForUser: React.FC<AdminAmbilBarangModalForUserProps> 
     userName
 }) => {
     const [stokHariIni, setStokHariIni] = useState<StokHarian[]>([]);
-    const [admins, setAdmins] = useState<UserType[]>([]);
-    const [selectedAdminId, setSelectedAdminId] = useState<number | null>(null);
     const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
     const [keterangan, setKeterangan] = useState("");
     const [loading, setLoading] = useState(true);
@@ -67,17 +64,6 @@ const AdminAmbilBarangModalForUser: React.FC<AdminAmbilBarangModalForUserProps> 
             const stokResponse = await stokService.getStokHariIni();
             if (stokResponse.success && stokResponse.data) {
                 setStokHariIni(stokResponse.data);
-            }
-
-            // Fetch admins for dropdown
-            const usersResponse = await userService.getAllUsers();
-            if (usersResponse.success && usersResponse.data) {
-                const adminList = usersResponse.data.filter(u => u.role === 'admin');
-                setAdmins(adminList);
-                // Set default admin (first admin)
-                if (adminList.length > 0) {
-                    setSelectedAdminId(adminList[0].id);
-                }
             }
         } catch (err) {
             console.error('Error fetching data:', err);
@@ -145,10 +131,6 @@ const AdminAmbilBarangModalForUser: React.FC<AdminAmbilBarangModalForUserProps> 
             return;
         }
 
-        if (!selectedAdminId) {
-            setError('Pilih admin penerima setor');
-            return;
-        }
 
         setSubmitting(true);
         setError(null);
@@ -156,7 +138,7 @@ const AdminAmbilBarangModalForUser: React.FC<AdminAmbilBarangModalForUserProps> 
         try {
             const response = await ambilBarangService.createAmbilBarang({
                 userId: userId,
-                setorKepadaId: selectedAdminId,
+                setorKepadaId: null,
                 keterangan: keterangan || `Diinput oleh admin`,
                 items: selectedItems.map(item => ({
                     stokHarianId: item.stokHarianId,
@@ -319,27 +301,6 @@ const AdminAmbilBarangModalForUser: React.FC<AdminAmbilBarangModalForUserProps> 
                                             </div>
                                         ))}
                                     </div>
-                                </div>
-                            )}
-
-                            {/* Admin Selection */}
-                            {selectedItems.length > 0 && (
-                                <div>
-                                    <label className="block text-white text-sm font-medium mb-2">
-                                        Setor Kepada (Admin)
-                                    </label>
-                                    <select
-                                        value={selectedAdminId || ''}
-                                        onChange={(e) => setSelectedAdminId(Number(e.target.value) || null)}
-                                        className="w-full bg-[#252525] border border-[#444] rounded-xl px-4 py-3 text-white focus:border-[#B09331] focus:outline-none"
-                                    >
-                                        <option value="">-- Pilih Admin --</option>
-                                        {admins.map(admin => (
-                                            <option key={admin.id} value={admin.id}>
-                                                {admin.nama_lengkap}
-                                            </option>
-                                        ))}
-                                    </select>
                                 </div>
                             )}
 

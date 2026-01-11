@@ -27,7 +27,7 @@ export interface CreateStokHarianRequest {
 // Ambil Barang
 export interface CreateAmbilBarangRequest {
     userId: number;
-    setorKepadaId: number;
+    setorKepadaId?: number | null;
     keterangan?: string;
     items: {
         stokHarianId: number;

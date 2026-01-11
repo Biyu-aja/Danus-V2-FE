@@ -16,6 +16,7 @@ export const adminListed = {
     historiStok: 'histori-stok',
     detailStok: 'detail-stok/:id',
     statusUser: 'status-user',
+    profil: 'profil',
 };
 
 // User routes

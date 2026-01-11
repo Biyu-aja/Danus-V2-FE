@@ -315,12 +315,6 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                         <CalendarIcon className="w-4 h-4 text-[#888]" />
                         <p className="text-[#888] text-md">{date ? date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Hari Ini'}</p> 
                     </div>
-                    {userData?.nomor_telepon && (
-                        <div className="flex items-center gap-2">
-                            <PhoneIcon className="w-4 h-4 text-[#888]" />
-                            <p className="text-[#888] text-md">{userData.nomor_telepon}</p>
-                        </div>
-                    )}
                 </div>
 
                 {/* Content */}
@@ -529,43 +523,22 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                                 </div>
                             )}
 
-                            {/* Note Input Section */}
-                            {showNoteInput && (
-                                <div className="bg-[#252525] p-3 rounded-xl border border-yellow-500/30">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <label className="text-yellow-400 text-sm">Catatan</label>
-                                        {note !== originalNote && (
-                                            <span className="text-xs text-yellow-400/70">Belum disimpan</span>
-                                        )}
-                                    </div>
-                                    <textarea
-                                        value={note}
-                                        onChange={(e) => setNote(e.target.value)}
-                                        placeholder="Tulis catatan di sini..."
-                                        rows={3}
-                                        className="w-full bg-[#1e1e1e] text-white border border-[#333] rounded-lg p-3 resize-none focus:border-yellow-500 focus:outline-none placeholder-[#666]"
-                                    />
-                                    <button
-                                        onClick={handleSaveNote}
-                                        disabled={savingNote || note === originalNote}
-                                        className="mt-2 w-full bg-yellow-600 text-white font-semibold py-2 rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                    >
-                                        {savingNote ? (
-                                            <>
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                                Menyimpan...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Save className="w-4 h-4" />
-                                                Simpan Catatan
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            )}
-
-
+                            {/* Note */}
+                            <div className="border border-[#2e2e2e] p-3 rounded-lg space-y-1">
+                                <p className="text-[#B09331] text-sm">Catatan: </p>
+                                <textarea
+                                    value={note}
+                                    onChange={(e) => setNote(e.target.value)}
+                                    onBlur={() => {
+                                        if (note !== originalNote) {
+                                            handleSaveNote();
+                                        }
+                                    }}
+                                    placeholder="Tulis catatan..."
+                                    rows={2}
+                                    className="w-full bg-[#1e1e1e] text-[#888] resize-none focus:outline-none placeholder-[#555] text-sm"
+                                />
+                            </div>
                         </>
                     )}
                 </div>
@@ -623,34 +596,24 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                             {/* Show these buttons only when there are pending items */}
                             {pendingItems.length > 0 ? (
                                 <>
-                                    <button 
-                                        className={`flex-1 font-medium py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm ${
-                                            showNoteInput 
-                                                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
-                                                : 'bg-[#333] text-white hover:bg-[#444] border border-[#444]'
-                                        }`}
-                                        onClick={handleAddNote}
-                                    >
-                                        <NotebookIcon className="w-4 h-4" />
-                                        {showNoteInput ? 'Sembunyikan' : 'Lihat Catatan'}
-                                    </button>
-                                    <button
-                                        onClick={handleSetor}
-                                        disabled={submitting || selectedItems.length === 0}
-                                        className="flex-1 bg-[#B09331] text-white font-semibold py-3 rounded-xl hover:bg-[#C4A73B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
-                                    >
-                                        {submitting ? (
-                                            <>
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                                Memproses...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Check className="w-4 h-4" />
-                                                Konfirmasi Setor
-                                            </>
-                                        )}
-                                    </button>
+                            {/* Catatan Button - Icon style */}
+                                <button
+                                    onClick={handleSetor}
+                                    disabled={submitting || selectedItems.length === 0}
+                                    className="flex-1 bg-[#B09331] text-white font-semibold py-3 rounded-xl hover:bg-[#C4A73B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                                >
+                                    {submitting ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Memproses...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Check className="w-4 h-4" />
+                                            Konfirmasi Setor
+                                        </>
+                                    )}
+                                </button>
                                 </>
                             ) : (
                                 /* When all items deposited, show close button */

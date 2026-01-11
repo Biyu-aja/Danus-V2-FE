@@ -16,12 +16,6 @@ export class AmbilBarangService {
             throw new NotFoundError(`User dengan ID ${data.userId} tidak ditemukan`);
         }
 
-        // Validasi admin (setorKepada) exists
-        const admin = await userRepository.findById(data.setorKepadaId);
-        if (!admin) {
-            throw new NotFoundError(`Admin dengan ID ${data.setorKepadaId} tidak ditemukan`);
-        }
-
         // Validasi items tidak kosong
         if (!data.items || data.items.length === 0) {
             throw new ValidationError('Items tidak boleh kosong');

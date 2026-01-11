@@ -1,4 +1,4 @@
-import { LayoutDashboardIcon, PackagePlusIcon, UsersIcon, WalletIcon } from "lucide-react";
+import { LayoutDashboardIcon, PackagePlusIcon, UsersIcon, WalletIcon, UserIcon } from "lucide-react";
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -11,6 +11,7 @@ const Navbar: React.FC = () => {
         { id: "kelola-keuangan", label: "Kelola Keuangan", icon: <WalletIcon /> },
         { id: "kelola-user", label: "Kelola User", icon: <UsersIcon /> },
         { id: "kelola-barang", label: "Kelola Barang", icon: <PackagePlusIcon /> },
+        { id: "profil", label: "Profil", icon: <UserIcon /> },
     ];
 
     // Ambil path terakhir → contoh: "/admin/kelola-user"

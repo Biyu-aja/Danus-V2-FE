@@ -12,8 +12,8 @@ export const createAmbilBarang = asyncHandler(async (req: Request, res: Response
     const data: CreateAmbilBarangRequest = req.body;
 
     // Basic validation
-    if (!data.userId || !data.setorKepadaId) {
-        throw new ValidationError('userId dan setorKepadaId wajib diisi');
+    if (!data.userId) {
+        throw new ValidationError('userId wajib diisi');
     }
 
     if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
