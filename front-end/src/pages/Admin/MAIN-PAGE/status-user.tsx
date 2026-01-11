@@ -214,15 +214,6 @@ const StatusUserPage: React.FC = () => {
                         <Users className="w-6 h-6 text-[#B09331]" />
                         <h1 className="text-white text-xl font-bold">Status User</h1>
                     </div>
-                    {viewMode === 'today' && (
-                        <button
-                            onClick={() => setShowAdminAmbilModal(true)}
-                            className="flex items-center gap-1.5 bg-[#B09331] text-white px-3 py-2 rounded-xl font-medium text-sm hover:bg-[#C4A73B] transition-colors"
-                        >
-                            <UserPlus className="w-4 h-4" />
-                            <span className="hidden sm:inline">Ambil Barang</span>
-                        </button>
-                    )}
                 </div>
 
                 {/* View Mode Tabs */}
@@ -445,13 +436,6 @@ const StatusUserPage: React.FC = () => {
             </main>
 
             <Navbar />
-
-            {/* Admin Ambil Barang Modal */}
-            <AdminAmbilBarangModal
-                isOpen={showAdminAmbilModal}
-                onClose={() => setShowAdminAmbilModal(false)}
-                onSuccess={refreshData}
-            />
         </div>
     );
 };

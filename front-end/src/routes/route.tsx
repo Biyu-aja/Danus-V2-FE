@@ -11,6 +11,7 @@ import HistoriStokPage from "../pages/Admin/MAIN-PAGE/histori-stok";
 import HistoriStokDetailPage from "../pages/Admin/MAIN-PAGE/histori-stok-detail";
 import SemuaBarangPage from "../pages/Admin/MAIN-PAGE/semua-barang";
 import UserDetailStatsPage from "../pages/Admin/MAIN-PAGE/user-detail-stats";
+import AdminProfilPage from "../pages/Admin/MAIN-PAGE/profil";
 import UserDashboard from "../pages/User/dashboard";
 import RiwayatPage from "../pages/User/riwayat";
 import ProfilPage from "../pages/User/profil";
@@ -31,6 +32,7 @@ const adminChildRoutes = [
     { path: adminListed.historiStok, element: <HistoriStokPage /> },
     { path: adminListed.detailStok, element: <HistoriStokDetailPage /> },
     { path: adminListed.statusUser, element: <StatusUserPage /> },
+    { path: adminListed.profil, element: <AdminProfilPage /> },
 ];
 
 // User child routes - menggunakan userListed untuk path
