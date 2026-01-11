@@ -7,7 +7,6 @@ import {
     ChevronRight, 
     Shield,
     PhoneIcon,
-    Settings,
     Users,
     Package as PackageIcon,
     Wallet,
@@ -187,15 +186,6 @@ const AdminProfilPage: React.FC = () => {
             iconBg: 'bg-purple-500/20',
             iconColor: 'text-purple-400',
             path: '/admin/kelola-keuangan'
-        },
-        {
-            id: 'status-user',
-            label: 'Status User',
-            description: 'Lihat status penyetoran hari ini',
-            icon: Settings,
-            iconBg: 'bg-orange-500/20',
-            iconColor: 'text-orange-400',
-            path: '/admin/status-user'
         }
     ];
 
@@ -348,7 +338,7 @@ const AdminProfilPage: React.FC = () => {
                 {/* Quick Access Menu */}
                 <div className="bg-[#1e1e1e] rounded-xl border border-[#333] p-4">
                     <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                        <Settings className="w-5 h-5 text-[#B09331]" />
+                        <Activity className="w-5 h-5 text-[#B09331]" />
                         Akses Cepat
                     </h3>
                     <div className="space-y-2">

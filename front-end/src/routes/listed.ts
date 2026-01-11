@@ -15,7 +15,6 @@ export const adminListed = {
     kelolaKeuangan: 'kelola-keuangan',
     historiStok: 'histori-stok',
     detailStok: 'detail-stok/:id',
-    statusUser: 'status-user',
     profil: 'profil',
 };
 
