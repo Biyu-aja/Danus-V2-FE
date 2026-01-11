@@ -143,7 +143,7 @@ const Dashboard: React.FC = () => {
 
                 {/* Quick Link to Status User */}
                 <button
-                    onClick={() => navigate('/admin/status-user')}
+                    onClick={() => navigate('/admin/kelola-user')}
                     className="flex items-center justify-between bg-[#1e1e1e] border border-[#333] rounded-xl p-3 hover:border-[#B09331]/50 transition-all group"
                 >
                     <div className="flex items-center gap-3">

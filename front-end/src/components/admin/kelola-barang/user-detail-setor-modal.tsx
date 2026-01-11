@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
     X, 
     User, 
@@ -18,7 +19,8 @@ import {
     NotebookIcon,
     Save,
     ExternalLink,
-    UserPlus
+    UserPlus,
+    ChevronRight
 } from "lucide-react";
 import { ambilBarangService, type AmbilBarang, type DetailSetor } from "../../../services/ambilBarang.service";
 import { userService, type User as UserType } from "../../../services/user.service";
@@ -49,6 +51,7 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
     userName,
     date
 }) => {
+    const navigate = useNavigate();
     const [ambilBarangList, setAmbilBarangList] = useState<AmbilBarang[]>([]);
     const [admins, setAdmins] = useState<UserType[]>([]);
     const [userData, setUserData] = useState<UserType | null>(null);
@@ -300,20 +303,32 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex flex-col gap-2 p-4 border-b border-[#333]">
-                    <div className="flex flex-row items-center gap-2 w-full justify-between">
-                        <div className="flex items-center gap-2">
-                            <NotebookIcon className="w-5 h-5 text-[#B09331]"/>
-                            <p className="text-white font-bold text-lg">Detail Absen Danus</p>
+                <div className="flex flex-col gap-3 p-4 border-b border-[#333]">
+                    {/* Title */}
+                    <div className="flex items-center gap-2">
+                        <NotebookIcon className="w-5 h-5 text-[#B09331]"/>
+                        <p className="text-white font-bold text-lg">Detail Absen Danus</p>
+                    </div>
+                    
+                    {/* Clickable Profile Card */}
+                    <div 
+                        onClick={() => {
+                            onClose();
+                            navigate(`/admin/kelola-user/${userId}`);
+                        }}
+                        className="flex items-center gap-3 p-3 bg-[#252525] rounded-xl border border-[#333] hover:border-[#B09331]/50 cursor-pointer transition-all group"
+                    >
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#B09331] to-[#D4AF37] flex items-center justify-center flex-shrink-0">
+                            <User className="w-5 h-5 text-white" />
                         </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <User className="w-5 h-5 text-[#888]" />
-                        <h2 className="text-white text-md">{userData?.nama_lengkap}</h2>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <CalendarIcon className="w-4 h-4 text-[#888]" />
-                        <p className="text-[#888] text-md">{date ? date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Hari Ini'}</p> 
+                        <div className="flex-1 min-w-0">
+                            <h2 className="text-white font-medium truncate">{userData?.nama_lengkap}</h2>
+                            <div className="flex items-center gap-1 text-[#888] text-xs">
+                                <CalendarIcon className="w-3 h-3" />
+                                <span>{date ? date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Hari Ini'}</span>
+                            </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-[#666] group-hover:text-[#B09331] transition-colors" />
                     </div>
                 </div>
 
