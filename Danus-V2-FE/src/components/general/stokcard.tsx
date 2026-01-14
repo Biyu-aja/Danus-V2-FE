@@ -47,7 +47,7 @@ const StokCard: React.FC<props> = ({
     return (
         <div 
             onClick={onClick}
-            className="relative w-[11rem] h-[15rem] rounded-xl hover:scale-[102%] cursor-pointer transition-all overflow-hidden shadow-lg"
+            className="relative min-w-[10rem] max-w-[11rem] h-[15rem] rounded-xl hover:scale-[102%] cursor-pointer transition-all overflow-hidden shadow-lg"
         >
             {/* Background */}
             {gambar ? (
