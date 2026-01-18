@@ -13,6 +13,7 @@ import {
     Package
 } from "lucide-react";
 import { stokService, barangService } from "../../../services/barang.service";
+import { localDateToISO, getLocalDateString } from "../../../helper/dateHelper";
 import type { StokHarian, Barang } from "../../../types/barang.types";
 
 type FilterMode = 'custom' | 'minggu' | 'bulan' | 'semua';
@@ -58,24 +59,26 @@ const HistoriStokPage: React.FC = () => {
             } = {};
 
             const today = new Date();
+            const todayStr = getLocalDateString(today);
             
             if (filterMode === 'minggu') {
                 // Last 7 days
                 const weekAgo = new Date(today);
                 weekAgo.setDate(weekAgo.getDate() - 7);
-                filters.startDate = weekAgo.toISOString();
-                filters.endDate = today.toISOString();
+                filters.startDate = localDateToISO(getLocalDateString(weekAgo));
+                filters.endDate = localDateToISO(todayStr);
             } else if (filterMode === 'bulan') {
                 // Last 30 days
                 const monthAgo = new Date(today);
                 monthAgo.setDate(monthAgo.getDate() - 30);
-                filters.startDate = monthAgo.toISOString();
-                filters.endDate = today.toISOString();
+                filters.startDate = localDateToISO(getLocalDateString(monthAgo));
+                filters.endDate = localDateToISO(todayStr);
             } else if (filterMode === 'custom' && startDate) {
-                filters.startDate = new Date(startDate).toISOString();
+                filters.startDate = localDateToISO(startDate);
                 if (endDate) {
-                    const end = new Date(endDate);
-                    end.setHours(23, 59, 59, 999);
+                    // Set end date to end of day
+                    const [year, month, day] = endDate.split('-').map(Number);
+                    const end = new Date(year, month - 1, day, 23, 59, 59);
                     filters.endDate = end.toISOString();
                 }
             }

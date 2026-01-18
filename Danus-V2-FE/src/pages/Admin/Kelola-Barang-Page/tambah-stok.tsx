@@ -7,6 +7,7 @@ import type { Barang } from "../../../types/barang.types";
 import { useNavigate } from "react-router-dom";
 import { Loader2, CheckCircle, AlertCircle, Boxes, Calendar } from "lucide-react";
 import { formatNominal } from "../../../helper/formatnominal";
+import { getLocalDateString, localDateToISO } from "../../../helper/dateHelper";
 
 const TambahStokPage: React.FC = () => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const TambahStokPage: React.FC = () => {
     const [hargaJual, setHargaJual] = useState("");
     const [modal, setModal] = useState("");
     const [keterangan, setKeterangan] = useState("");
-    const [tanggalEdar, setTanggalEdar] = useState(new Date().toISOString().split('T')[0]);
+    const [tanggalEdar, setTanggalEdar] = useState(getLocalDateString());
     
     // UI state
     const [isLoading, setIsLoading] = useState(false);
@@ -85,7 +86,7 @@ const TambahStokPage: React.FC = () => {
                 harga: parseInt(hargaJual),
                 modal: parseInt(modal),
                 keterangan: keterangan.trim() || undefined,
-                tanggalEdar: new Date(tanggalEdar).toISOString(),
+                tanggalEdar: localDateToISO(tanggalEdar),
             });
 
             if (response.success) {
@@ -95,7 +96,7 @@ const TambahStokPage: React.FC = () => {
                 setHargaJual("");
                 setModal("");
                 setKeterangan("");
-                setTanggalEdar(new Date().toISOString().split('T')[0]);
+                setTanggalEdar(getLocalDateString());
                 // Redirect setelah 1.5 detik
                 setTimeout(() => {
                     navigate(-1);
