@@ -319,7 +319,7 @@ const DetailBarang: React.FC<DetailBarangProps> = ({ barang, onClose, onUpdate, 
                                             </div>
                                             <div>
                                                 <p className="text-[#888] text-xs">Total Stok Edar</p>
-                                                <p className="text-white font-bold">
+                                                <p className="text-blue-400 text-sm font-bold">
                                                     {barangData.stokHarian?.length || 0} kali
                                                 </p>
                                             </div>

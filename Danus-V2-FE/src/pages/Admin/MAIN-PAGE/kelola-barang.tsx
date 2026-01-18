@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/admin/general-admin/navbar";
 import Header from "../../../components/general/header";
@@ -9,6 +9,7 @@ import CardBarang from "../../../components/admin/kelola-barang/cardbarang";
 import DetailBarang from "../../../components/admin/kelola-barang/detail-barang";
 import DetailStokModal from "../../../components/admin/kelola-barang/detail-stok-modal";
 import { barangService, stokService } from "../../../services/barang.service";
+import { useDebounce } from "../../../hooks/useDebounce";
 import type { Barang, StokHarian } from "../../../types/barang.types";
 import { Loader2, Package, Boxes, History, Plus, HistoryIcon } from "lucide-react";
 
@@ -19,10 +20,12 @@ const KelolaBarang: React.FC = () => {
     const [barangList, setBarangList] = useState<Barang[]>([]);
     const [stokHariIni, setStokHariIni] = useState<StokHarian[]>([]);
     
-    // State untuk UI
-    const [isLoadingBarang, setIsLoadingBarang] = useState(true);
-    const [isLoadingStok, setIsLoadingStok] = useState(true);
+    // State untuk UI - unified loading state
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
+    
+    // Debounce search query (300ms delay)
+    const debouncedSearchQuery = useDebounce(searchQuery, 300);
     
     // State untuk detail modal barang
     const [selectedBarang, setSelectedBarang] = useState<Barang | null>(null);
@@ -33,38 +36,32 @@ const KelolaBarang: React.FC = () => {
     const [showDetailStok, setShowDetailStok] = useState(false);
 
     const [openAdd, setOpenAdd] = useState(false);
-    // Fetch data saat komponen mount
+    
+    // Fetch data saat komponen mount - OPTIMIZED with Promise.all
     useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                // Fetch both API calls in parallel
+                const [barangResponse, stokResponse] = await Promise.all([
+                    barangService.getAllBarang(),
+                    stokService.getStokHariIni()
+                ]);
+                
+                if (barangResponse.success && barangResponse.data) {
+                    setBarangList(barangResponse.data);
+                }
+                if (stokResponse.success && stokResponse.data) {
+                    setStokHariIni(stokResponse.data);
+                }
+            } catch (err) {
+                console.error('Error fetching data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
         fetchData();
     }, []);
-
-    const fetchData = async () => {
-        // Fetch barang
-        setIsLoadingBarang(true);
-        try {
-            const barangResponse = await barangService.getAllBarang();
-            if (barangResponse.success && barangResponse.data) {
-                setBarangList(barangResponse.data);
-            }
-        } catch (err) {
-            console.error('Error fetching barang:', err);
-        } finally {
-            setIsLoadingBarang(false);
-        }
-
-        // Fetch stok hari ini
-        setIsLoadingStok(true);
-        try {
-            const stokResponse = await stokService.getStokHariIni();
-            if (stokResponse.success && stokResponse.data) {
-                setStokHariIni(stokResponse.data);
-            }
-        } catch (err) {
-            console.error('Error fetching stok:', err);
-        } finally {
-            setIsLoadingStok(false);
-        }
-    };
 
     // Handle click pada card barang
     const handleCardClick = (barang: Barang) => {
@@ -114,15 +111,23 @@ const KelolaBarang: React.FC = () => {
         setSelectedStok(null);
     };
 
-    // Filter berdasarkan search query
-    const filteredBarang = barangList.filter(barang => 
-        barang.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        barang.keterangan?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Filter berdasarkan debounced search query (using useMemo for performance)
+    const filteredBarang = useMemo(() => {
+        if (!debouncedSearchQuery.trim()) return barangList;
+        const query = debouncedSearchQuery.toLowerCase();
+        return barangList.filter(barang => 
+            barang.nama.toLowerCase().includes(query) ||
+            barang.keterangan?.toLowerCase().includes(query)
+        );
+    }, [barangList, debouncedSearchQuery]);
 
-    const filteredStok = stokHariIni.filter(stok => 
-        stok.barang?.nama.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredStok = useMemo(() => {
+        if (!debouncedSearchQuery.trim()) return stokHariIni;
+        const query = debouncedSearchQuery.toLowerCase();
+        return stokHariIni.filter(stok => 
+            stok.barang?.nama.toLowerCase().includes(query)
+        );
+    }, [stokHariIni, debouncedSearchQuery]);
 
     return (
         <div className="flex flex-col min-h-screen bg-[#121212]">
@@ -137,7 +142,7 @@ const KelolaBarang: React.FC = () => {
                 {/* Stok Hari Ini Section */}
                 <div className="flex flex-col gap-2">
                     {/* Info tambahan jika ada data */}
-                    {!isLoadingBarang && !isLoadingStok && (barangList.length > 0 || stokHariIni.length > 0) && (
+                    {!loading && (barangList.length > 0 || stokHariIni.length > 0) && (
                         <div className="flex flex-row gap-3 mt-2">
                             <div className="flex-1 bg-[#1e1e1e] rounded-xl p-3 border border-[#333]">
                                 <p className="text-[#888] text-xs">Total Jenis Barang</p>
@@ -161,7 +166,7 @@ const KelolaBarang: React.FC = () => {
                         </button>
                     </div>
                     
-                    {isLoadingStok ? (
+                    {loading ? (
                         <div className="flex items-center justify-center h-[16rem] bg-[#1e1e1e] rounded-xl">
                             <div className="flex flex-col items-center gap-2 text-[#888]">
                                 <Loader2 className="w-8 h-8 animate-spin" />
@@ -208,7 +213,7 @@ const KelolaBarang: React.FC = () => {
                             <span>Lihat Semua Barang</span>
                         </button>
                     </div>
-                    {isLoadingBarang ? (
+                    {loading ? (
                         <div className="flex items-center justify-center h-[16rem] bg-[#1e1e1e] rounded-xl">
                             <div className="flex flex-col items-center gap-2 text-[#888]">
                                 <Loader2 className="w-8 h-8 animate-spin" />
