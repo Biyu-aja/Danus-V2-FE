@@ -310,7 +310,7 @@ const DetailBarang: React.FC<DetailBarangProps> = ({ barang, onClose, onUpdate, 
                                         </div>
                                     </div>
                                 </div>
-                            ) : barangData.stokHarian && barangData.stokHarian.length > 0 ? (
+                            ) : (
                                 <div className="grid grid-cols-2 gap-2 mt-3">
                                     <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl">
                                         <div className="flex items-center gap-2">
@@ -320,7 +320,7 @@ const DetailBarang: React.FC<DetailBarangProps> = ({ barang, onClose, onUpdate, 
                                             <div>
                                                 <p className="text-[#888] text-xs">Total Stok Edar</p>
                                                 <p className="text-white font-bold">
-                                                    {barangData.stokHarian.length} kali
+                                                    {barangData.stokHarian?.length || 0} kali
                                                 </p>
                                             </div>
                                         </div>
@@ -334,17 +334,17 @@ const DetailBarang: React.FC<DetailBarangProps> = ({ barang, onClose, onUpdate, 
                                                 <p className="text-[#888] text-xs">Total Omzet</p>
                                                 <p className="text-green-400 font-bold text-sm">
                                                     Rp {new Intl.NumberFormat('id-ID').format(
-                                                        barangData.stokHarian.reduce((total, stok) => {
+                                                        barangData.stokHarian?.reduce((total, stok) => {
                                                             const stokOmzet = stok.detailSetor?.reduce((sum, ds) => sum + ds.totalHarga, 0) || 0;
                                                             return total + stokOmzet;
-                                                        }, 0)
+                                                        }, 0) || 0
                                                     )}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            ) : null}
+                            )}
 
                             {/* Stok Terbaru */}
                             {barangData.stokHarian && barangData.stokHarian.length > 0 && !isLoadingData && (
