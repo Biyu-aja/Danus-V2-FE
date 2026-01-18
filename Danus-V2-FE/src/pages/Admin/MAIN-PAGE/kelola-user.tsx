@@ -10,7 +10,9 @@ import {
     Package,
     X,
     History,
-    Calendar
+    Calendar,
+    ChevronLeft,
+    ChevronRight
 } from "lucide-react";
 import { userService, type UserWithStatus } from "../../../services/user.service";
 import { stokService } from "../../../services/barang.service";
@@ -34,6 +36,10 @@ const KelolaUser: React.FC = () => {
 
     // Debounce search query (300ms delay)
     const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     // History state
     const [historiStok, setHistoriStok] = useState<StokHarian[]>([]);
@@ -207,6 +213,19 @@ const KelolaUser: React.FC = () => {
         { key: 'BELUM_AMBIL', label: 'Belum Ambil', count: statusCounts.BELUM_AMBIL },
     ];
 
+    // Pagination calculations
+    const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+    const paginatedUsers = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        return filteredUsers.slice(startIndex, endIndex);
+    }, [filteredUsers, currentPage]);
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debouncedSearchQuery, statusFilter, selectedBarangIds]);
+
     return (
         <div className="flex flex-col min-h-screen bg-[#121212]">
             <Header />
@@ -357,16 +376,57 @@ const KelolaUser: React.FC = () => {
                                 </p>
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-2">
-                                {filteredUsers.map((user) => (
-                                    <UserStatusCard
-                                        key={user.id}
-                                        user={user}
-                                        selectedBarangIds={selectedBarangIds}
-                                        onSuccess={refreshData}
-                                    />
-                                ))}
-                            </div>
+                            <>
+                                {/* User List */}
+                                <div className="flex flex-col gap-2">
+                                    {paginatedUsers.map((user) => (
+                                        <UserStatusCard
+                                            key={user.id}
+                                            user={user}
+                                            selectedBarangIds={selectedBarangIds}
+                                            onSuccess={refreshData}
+                                        />
+                                    ))}
+                                </div>
+
+                                {/* Pagination Controls - Mobile Friendly */}
+                                {totalPages > 1 && (
+                                    <div className="flex flex-col gap-3 mt-4 bg-[#1e1e1e] rounded-xl p-3 border border-[#333]">
+                                        {/* Page Info */}
+                                        <div className="flex items-center justify-center">
+                                            <p className="text-[#888] text-xs text-center">
+                                                {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)} dari {filteredUsers.length} user
+                                            </p>
+                                        </div>
+                                        
+                                        {/* Page Controls */}
+                                        <div className="flex items-center justify-center gap-3">
+                                            <button
+                                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                                disabled={currentPage === 1}
+                                                className="w-10 h-10 rounded-xl bg-[#333] flex items-center justify-center text-white disabled:opacity-40 disabled:cursor-not-allowed active:bg-[#444] transition-colors"
+                                            >
+                                                <ChevronLeft className="w-5 h-5" />
+                                            </button>
+                                            
+                                            {/* Current Page / Total */}
+                                            <div className="flex items-center gap-1 px-4 py-2 bg-[#252525] rounded-xl">
+                                                <span className="text-[#B09331] font-bold text-lg">{currentPage}</span>
+                                                <span className="text-[#666]">/</span>
+                                                <span className="text-[#888] text-sm">{totalPages}</span>
+                                            </div>
+                                            
+                                            <button
+                                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                                disabled={currentPage === totalPages}
+                                                className="w-10 h-10 rounded-xl bg-[#333] flex items-center justify-center text-white disabled:opacity-40 disabled:cursor-not-allowed active:bg-[#444] transition-colors"
+                                            >
+                                                <ChevronRight className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </>
                 ) : (
