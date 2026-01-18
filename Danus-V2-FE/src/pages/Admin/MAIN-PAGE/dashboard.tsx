@@ -138,14 +138,14 @@ const Dashboard: React.FC = () => {
                         value={loading ? "..." : `${totalJumlahAmbil} pcs`}
                         icon={Package}
                         variant="default"
-                        onClick={() => navigate('/admin/status-user')}
+                        onClick={() => navigate('/admin/kelola-user')}
                     />
                     <CardItem 
                         label="Total Setor" 
                         value={loading ? "..." : `${totalJumlahSetor} pcs`}
                         icon={CheckCircle}
                         variant="info"
-                        onClick={() => navigate('/admin/status-user')}
+                        onClick={() => navigate('/admin/kelola-user')}
                     />
                 </div>
 
