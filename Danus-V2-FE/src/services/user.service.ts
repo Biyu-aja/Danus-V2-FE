@@ -184,6 +184,42 @@ export const userService = {
                 message: 'Terjadi kesalahan jaringan',
             };
         }
+    },
+
+    /**
+     * Update user data (phone number and notes)
+     */
+    async updateUser(id: number, data: { nomor_telepon?: string; catatan?: string }): Promise<ApiResponse<User>> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: result.message || 'Gagal mengupdate data user',
+                };
+            }
+
+            return {
+                success: true,
+                message: result.message || 'Berhasil mengupdate data user',
+                data: result.data,
+            };
+        } catch (error) {
+            console.error('Update user error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
     }
 };
 

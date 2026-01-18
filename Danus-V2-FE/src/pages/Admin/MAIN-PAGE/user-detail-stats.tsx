@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/general/header";
 import Navbar from "../../../components/admin/general-admin/navbar";
 import UserDetailSetorModal from "../../../components/admin/kelola-barang/user-detail-setor-modal";
+import EditUserModal from "../../../components/admin/kelola-barang/edit-user-modal";
 import { 
     ArrowLeft, 
     Calendar, 
@@ -12,7 +13,9 @@ import {
     Loader2,
     Activity,
     CheckCircle,
-    Package
+    Package,
+    Edit,
+    FileText
 } from "lucide-react";
 import { userService, type UserStats, type CalendarDay } from "../../../services/user.service";
 import { FaWhatsapp } from "react-icons/fa6";
@@ -29,6 +32,7 @@ const UserDetailStatsPage: React.FC = () => {
     // Modal state
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedDetailDate, setSelectedDetailDate] = useState<Date | undefined>(undefined);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -192,6 +196,26 @@ const UserDetailStatsPage: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* Catatan Admin (if exists) */}
+                        {stats.user.catatan && (
+                            <div className="bg-[#1e1e1e] rounded-xl p-4 border border-[#333]">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <FileText className="w-4 h-4 text-[#B09331]" />
+                                    <span className="text-[#888] text-sm">Catatan Admin</span>
+                                </div>
+                                <p className="text-white text-sm whitespace-pre-wrap">{stats.user.catatan}</p>
+                            </div>
+                        )}
+
+                        {/* Edit Button */}
+                        <button
+                            onClick={() => setShowEditModal(true)}
+                            className="flex items-center justify-center gap-2 w-full bg-[#1e1e1e] border border-[#333] rounded-xl py-3 text-[#B09331] hover:bg-[#252525] transition-colors"
+                        >
+                            <Edit className="w-4 h-4" />
+                            Edit Data User
+                        </button>
+
                         {/* Summary Stats */}
                         {(() => {
                             let totalAmbil = 0;
@@ -317,6 +341,20 @@ const UserDetailStatsPage: React.FC = () => {
                     userId={stats.user.id}
                     userName={stats.user.nama_lengkap}
                     date={selectedDetailDate}
+                />
+            )}
+
+            {/* Edit User Modal */}
+            {stats && (
+                <EditUserModal
+                    isOpen={showEditModal}
+                    onClose={() => setShowEditModal(false)}
+                    onSuccess={(updatedUser) => {
+                        setShowEditModal(false);
+                        // Update local state with new user data
+                        setStats(prev => prev ? { ...prev, user: { ...prev.user, ...updatedUser } } : null);
+                    }}
+                    user={stats.user}
                 />
             )}
         </div>
