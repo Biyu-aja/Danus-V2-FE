@@ -19,43 +19,48 @@ import {
 import StokCard from "../../../components/general/stokcard";
 import TitleAdd from "../../../components/general/title-add";
 import DetailStokModal from "../../../components/admin/kelola-barang/detail-stok-modal";
-import { useSaldo, useLaporanHarian } from "../../../hooks/useKeuangan";
+import { keuanganService } from "../../../services/keuangan.service";
 import { stokService } from "../../../services/barang.service";
 import type { StokHarian } from "../../../types/barang.types";
+import type { Saldo, LaporanHarian } from "../../../types/keuangan.types";
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
     
-    // Fetch saldo dari backend
-    const { saldo, isLoading: loadingSaldo } = useSaldo();
-    
-    // Fetch laporan harian dari backend
-    const { laporan, isLoading: loadingLaporan } = useLaporanHarian();
-    
-    // Stok hari ini
+    // Combined state for all data
+    const [saldo, setSaldo] = useState<Saldo | null>(null);
+    const [laporan, setLaporan] = useState<LaporanHarian | null>(null);
     const [stokHariIni, setStokHariIni] = useState<StokHarian[]>([]);
-    const [loadingStok, setLoadingStok] = useState(true);
+    const [loading, setLoading] = useState(true);
     
     // Modal state
     const [selectedStok, setSelectedStok] = useState<StokHarian | null>(null);
     const [showStokModal, setShowStokModal] = useState(false);
 
-    // Fetch stok hari ini
+    // Fetch all data in parallel (OPTIMIZED)
     useEffect(() => {
-        const fetchStok = async () => {
-            setLoadingStok(true);
+        const fetchAllData = async () => {
+            setLoading(true);
             try {
-                const response = await stokService.getStokHariIni();
-                if (response.success && response.data) {
-                    setStokHariIni(response.data);
+                // Fetch all 3 API calls in parallel
+                const [saldoData, laporanData, stokResponse] = await Promise.all([
+                    keuanganService.getSaldo(),
+                    keuanganService.getLaporanHarian(),
+                    stokService.getStokHariIni()
+                ]);
+                
+                setSaldo(saldoData);
+                setLaporan(laporanData);
+                if (stokResponse.success && stokResponse.data) {
+                    setStokHariIni(stokResponse.data);
                 }
             } catch (err) {
-                console.error('Error fetching stok:', err);
+                console.error('Error fetching dashboard data:', err);
             } finally {
-                setLoadingStok(false);
+                setLoading(false);
             }
         };
-        fetchStok();
+        fetchAllData();
     }, []);
 
     const handleStokClick = (item: StokHarian) => {
@@ -96,27 +101,30 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 {/* Total Saldo */}
-                <Total_Saldo saldo={saldo?.totalSaldo} isLoading={loadingSaldo} />
+                <Total_Saldo saldo={saldo?.totalSaldo} isLoading={loading} />
                 
                 {/* Omzet, Pengeluaran & Laba Hari Ini */}
-                <div className="grid grid-cols-3 gap-2">
-                    <CardItem 
-                        label="Omzet" 
-                        value={loadingLaporan ? "..." : formatRupiah(laporan?.pemasukan.total || 0)}
-                        icon={TrendingUp}
-                        variant="income"
-                        prefix="Rp "
-                    />
-                    <CardItem 
-                        label="Pengeluaran" 
-                        value={loadingLaporan ? "..." : formatRupiah(laporan?.pengeluaran.total || 0)}
-                        icon={TrendingDown}
-                        variant="expense"
-                        prefix="Rp "
-                    />
+                <div className="flex flex-col gap-3">
+                    <div className="flex flex-row gap-3">
+                        <CardItem 
+                            label="Omzet" 
+                            value={loading ? "..." : formatRupiah(laporan?.pemasukan.total || 0)}
+                            icon={TrendingUp}
+                            variant="income"
+                            prefix="Rp "
+                        />
+                        <CardItem 
+                            label="Pengeluaran" 
+                            value={loading ? "..." : formatRupiah(laporan?.pengeluaran.total || 0)}
+                            icon={TrendingDown}
+                            variant="expense"
+                            prefix="Rp "
+                        />
+                    </div>
+
                     <CardItem 
                         label="Laba" 
-                        value={loadingLaporan ? "..." : formatRupiah((laporan?.pemasukan.total || 0) - (laporan?.pengeluaran.total || 0))}
+                        value={loading ? "..." : formatRupiah((laporan?.pemasukan.total || 0) - (laporan?.pengeluaran.total || 0))}
                         icon={DollarSign}
                         variant={(laporan?.selisih || 0) >= 0 ? "info" : "expense"}
                         prefix="Rp "
@@ -127,14 +135,14 @@ const Dashboard: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                     <CardItem 
                         label="Total Ambil" 
-                        value={loadingStok ? "..." : `${totalJumlahAmbil} pcs`}
+                        value={loading ? "..." : `${totalJumlahAmbil} pcs`}
                         icon={Package}
                         variant="default"
                         onClick={() => navigate('/admin/status-user')}
                     />
                     <CardItem 
                         label="Total Setor" 
-                        value={loadingStok ? "..." : `${totalJumlahSetor} pcs`}
+                        value={loading ? "..." : `${totalJumlahSetor} pcs`}
                         icon={CheckCircle}
                         variant="info"
                         onClick={() => navigate('/admin/status-user')}
@@ -161,7 +169,7 @@ const Dashboard: React.FC = () => {
                 {/* Stok Hari Ini Section */}
                 <TitleAdd title="Stok Hari Ini" navigateTo="/admin/kelola-barang/tambah-stok"/>
                 
-                {loadingStok ? (
+                {loading ? (
                     <div className="flex items-center justify-center h-[10rem] bg-[#1e1e1e] rounded-xl border border-[#333]">
                         <div className="flex flex-col items-center gap-2 text-[#888]">
                             <Loader2 className="w-8 h-8 animate-spin" />

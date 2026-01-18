@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { userService, type UserWithStatus } from "../../../services/user.service";
 import { stokService } from "../../../services/barang.service";
+import { useDebounce } from "../../../hooks/useDebounce";
 import type { StokHarian } from "../../../types/barang.types";
 
 type StatusFilter = 'SEMUA' | 'SUDAH_SETOR' | 'BELUM_SETOR' | 'BELUM_AMBIL';
@@ -31,12 +32,36 @@ const KelolaUser: React.FC = () => {
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('SEMUA');
     const [selectedBarangIds, setSelectedBarangIds] = useState<number[]>([]);
 
+    // Debounce search query (300ms delay)
+    const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
     // History state
     const [historiStok, setHistoriStok] = useState<StokHarian[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
 
-    // Fetch users with status and stok hari ini
+    // Fetch users with status and stok hari ini - OPTIMIZED with Promise.all
     useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                // Fetch both API calls in parallel
+                const [usersResponse, stokResponse] = await Promise.all([
+                    userService.getUsersWithTodayStatus(),
+                    stokService.getStokHariIni()
+                ]);
+                
+                if (usersResponse.success && usersResponse.data) {
+                    setUsers(usersResponse.data);
+                }
+                if (stokResponse.success && stokResponse.data) {
+                    setStokHariIni(stokResponse.data);
+                }
+            } catch (err) {
+                console.error('Error fetching data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
         fetchData();
     }, []);
 
@@ -46,25 +71,6 @@ const KelolaUser: React.FC = () => {
             fetchHistory();
         }
     }, [viewMode]);
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const usersResponse = await userService.getUsersWithTodayStatus();
-            if (usersResponse.success && usersResponse.data) {
-                setUsers(usersResponse.data);
-            }
-            
-            const stokResponse = await stokService.getStokHariIni();
-            if (stokResponse.success && stokResponse.data) {
-                setStokHariIni(stokResponse.data);
-            }
-        } catch (err) {
-            console.error('Error fetching data:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const fetchHistory = async () => {
         setLoadingHistory(true);
@@ -80,15 +86,17 @@ const KelolaUser: React.FC = () => {
         }
     };
 
-    // Refresh data function
+    // Refresh data function - OPTIMIZED with Promise.all
     const refreshData = async () => {
         try {
-            const usersResponse = await userService.getUsersWithTodayStatus();
+            const [usersResponse, stokResponse] = await Promise.all([
+                userService.getUsersWithTodayStatus(),
+                stokService.getStokHariIni()
+            ]);
+            
             if (usersResponse.success && usersResponse.data) {
                 setUsers(usersResponse.data);
             }
-            
-            const stokResponse = await stokService.getStokHariIni();
             if (stokResponse.success && stokResponse.data) {
                 setStokHariIni(stokResponse.data);
             }
@@ -148,12 +156,12 @@ const KelolaUser: React.FC = () => {
         setSelectedBarangIds([]);
     };
 
-    // Filter and sort users
+    // Filter and sort users (using debounced search for performance)
     const filteredUsers = useMemo(() => {
         let result = [...users];
 
-        if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase();
+        if (debouncedSearchQuery.trim()) {
+            const query = debouncedSearchQuery.toLowerCase();
             result = result.filter(user => 
                 user.nama_lengkap.toLowerCase().includes(query) ||
                 user.username.toLowerCase().includes(query) ||
@@ -180,7 +188,7 @@ const KelolaUser: React.FC = () => {
         result.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 
         return result;
-    }, [users, searchQuery, statusFilter, selectedBarangIds]);
+    }, [users, debouncedSearchQuery, statusFilter, selectedBarangIds]);
 
     // Count by status
     const statusCounts = useMemo(() => {

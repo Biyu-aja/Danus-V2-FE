@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/general/header";
 import Navbar from "../../../components/admin/general-admin/navbar";
 import UserDetailSetorModal from "../../../components/admin/kelola-barang/user-detail-setor-modal";
+import AdminAbsenStokModal from "../../../components/admin/kelola-barang/admin-absen-stok-modal";
 import { 
     Loader2, 
     Search, 
@@ -12,7 +13,8 @@ import {
     ArrowLeft,
     Package,
     Calendar,
-    BoxIcon
+    BoxIcon,
+    UserPlus
 } from "lucide-react";
 import { stokService } from "../../../services/barang.service";
 import type { StokHarian } from "../../../types/barang.types";
@@ -45,6 +47,17 @@ const HistoriStokDetailPage: React.FC = () => {
     // Modal state
     const [selectedUser, setSelectedUser] = useState<UserTransaction | null>(null);
     const [showModal, setShowModal] = useState(false);
+    const [showAbsenModal, setShowAbsenModal] = useState(false);
+
+    // Check if stok is for today
+    const isToday = useMemo(() => {
+        if (!stok) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const stokDate = new Date(stok.tanggalEdar);
+        stokDate.setHours(0, 0, 0, 0);
+        return today.getTime() === stokDate.getTime();
+    }, [stok]);
 
     // Fetch stok detail with users
     useEffect(() => {
@@ -199,17 +212,29 @@ const HistoriStokDetailPage: React.FC = () => {
             
             <main className="flex flex-col mt-[3.5rem] gap-4 p-4 mb-[5rem]">
                 {/* Back Button & Title */}
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="w-10 h-10 rounded-xl bg-[#1e1e1e] flex items-center justify-center text-[#888] hover:text-white transition-colors"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </button>
-                    <div>
-                        <h1 className="text-white text-lg font-bold">Detail Stok</h1>
-                        <p className="text-[#888] text-sm">Detail Stok {stok.barang?.nama} Tanggal {formatTanggal(stok.tanggalEdar)}</p>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="w-10 h-10 rounded-xl bg-[#1e1e1e] flex items-center justify-center text-[#888] hover:text-white transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
+                        <div>
+                            <h1 className="text-white text-lg font-bold">Detail Stok</h1>
+                            <p className="text-[#888] text-sm">Detail Stok {stok.barang?.nama} Tanggal {formatTanggal(stok.tanggalEdar)}</p>
+                        </div>
                     </div>
+                    {/* Tambah Absen Button - Only show for today */}
+                    {isToday && (
+                        <button
+                            onClick={() => setShowAbsenModal(true)}
+                            className="flex items-center gap-2 bg-[#B09331] hover:bg-[#C4A73B] text-white px-4 py-2 rounded-xl transition-colors text-sm font-medium"
+                        >
+                            <UserPlus className="w-4 h-4" />
+                            Tambah Absen
+                        </button>
+                    )}
                 </div>
 
                 {/* Stok Info Card */}
@@ -420,6 +445,26 @@ const HistoriStokDetailPage: React.FC = () => {
                     userId={selectedUser.user.id}
                     userName={selectedUser.user.nama_lengkap}
                     date={new Date(stok.tanggalEdar)}
+                />
+            )}
+
+            {/* Admin Absen Stok Modal */}
+            {stok && (
+                <AdminAbsenStokModal
+                    isOpen={showAbsenModal}
+                    onClose={() => setShowAbsenModal(false)}
+                    onSuccess={() => {
+                        setShowAbsenModal(false);
+                        // Refresh data
+                        const refreshData = async () => {
+                            const response = await stokService.getStokDetail(parseInt(id!, 10));
+                            if (response.success && response.data) {
+                                setStok(response.data);
+                            }
+                        };
+                        refreshData();
+                    }}
+                    stok={stok}
                 />
             )}
         </div>

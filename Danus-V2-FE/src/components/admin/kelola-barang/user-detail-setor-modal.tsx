@@ -20,7 +20,8 @@ import {
     Save,
     ExternalLink,
     UserPlus,
-    ChevronRight
+    ChevronRight,
+    XIcon
 } from "lucide-react";
 import { ambilBarangService, type AmbilBarang, type DetailSetor } from "../../../services/ambilBarang.service";
 import { userService, type User as UserType } from "../../../services/user.service";
@@ -305,9 +306,14 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                 {/* Header */}
                 <div className="flex flex-col gap-3 p-4 border-b border-[#333]">
                     {/* Title */}
-                    <div className="flex items-center gap-2">
-                        <NotebookIcon className="w-5 h-5 text-[#B09331]"/>
-                        <p className="text-white font-bold text-lg">Detail Absen Danus</p>
+                    <div className="flex justify-between">
+                        <div className="flex items-center gap-2">
+                            <NotebookIcon className="w-5 h-5 text-[#B09331]"/>
+                            <p className="text-white font-bold text-lg">Detail Absen Danus</p>
+                        </div>
+                        <button onClick={onClose}>
+                            <XIcon />
+                        </button>
                     </div>
                     
                     {/* Clickable Profile Card */}
@@ -597,41 +603,39 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                                 <FaWhatsapp className="w-5 h-5" />
                             </a>
                             
-                            {/* Admin Tambah Absen - Only show for today */}
-                            {isToday && (
-                                <button
-                                    onClick={() => setShowAdminAmbilModal(true)}
-                                    className="w-12 h-12 rounded-xl flex items-center justify-center transition-colors bg-[#B09331] hover:bg-[#C4A73B] text-white"
-                                    title="Tambah Pengambilan Barang"
-                                >
-                                    <UserPlus className="w-5 h-5" />
-                                </button>
-                            )}
-                            
                             {/* Show these buttons only when there are pending items */}
                             {pendingItems.length > 0 ? (
                                 <>
-                            {/* Catatan Button - Icon style */}
-                                <button
-                                    onClick={handleSetor}
-                                    disabled={submitting || selectedItems.length === 0}
-                                    className="flex-1 bg-[#B09331] text-white font-semibold py-3 rounded-xl hover:bg-[#C4A73B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
-                                >
-                                    {submitting ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                            Memproses...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Check className="w-4 h-4" />
-                                            Konfirmasi Setor
-                                        </>
-                                    )}
-                                </button>
+                                    {/* Setor Button */}
+                                    <button
+                                        onClick={handleSetor}
+                                        disabled={submitting || selectedItems.length === 0}
+                                        className="flex-1 bg-[#B09331] text-white font-semibold py-3 rounded-xl hover:bg-[#C4A73B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                                    >
+                                        {submitting ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Memproses...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Check className="w-4 h-4" />
+                                                Konfirmasi Setor
+                                            </>
+                                        )}
+                                    </button>
                                 </>
+                            ) : isToday ? (
+                                /* When today and no pending items, show Tambah Absen button */
+                                <button
+                                    onClick={() => setShowAdminAmbilModal(true)}
+                                    className="flex-1 bg-[#B09331] text-white font-semibold py-3 rounded-xl hover:bg-[#C4A73B] transition-colors flex items-center justify-center gap-2 text-sm"
+                                >
+                                    <UserPlus className="w-5 h-5" />
+                                    Tambah Absen
+                                </button>
                             ) : (
-                                /* When all items deposited, show close button */
+                                /* When past date and no pending items, show Tutup button */
                                 <button
                                     onClick={onClose}
                                     className="flex-1 bg-[#333] text-white font-semibold py-3 rounded-xl hover:bg-[#444] transition-colors flex items-center justify-center gap-2 text-sm"
