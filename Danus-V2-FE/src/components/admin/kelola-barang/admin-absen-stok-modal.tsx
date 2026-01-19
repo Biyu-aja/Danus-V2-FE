@@ -10,7 +10,8 @@ import {
     AlertCircle,
     User,
     Search,
-    ChevronDown
+    ChevronDown,
+    Shield
 } from "lucide-react";
 import { ambilBarangService } from "../../../services/ambilBarang.service";
 import { userService, type User as UserType } from "../../../services/user.service";
@@ -58,8 +59,14 @@ const AdminAbsenStokModal: React.FC<AdminAbsenStokModalProps> = ({
         try {
             const response = await userService.getAllUsers();
             if (response.success && response.data) {
-                // Filter only regular users (not admins)
-                setUsers(response.data.filter(u => u.role === 'user'));
+                // Include all users (both admin and regular users)
+                // Sort: regular users first, then admins
+                const sortedUsers = response.data.sort((a, b) => {
+                    if (a.role === 'user' && b.role !== 'user') return -1;
+                    if (a.role !== 'user' && b.role === 'user') return 1;
+                    return a.nama_lengkap.localeCompare(b.nama_lengkap);
+                });
+                setUsers(sortedUsers);
             }
         } catch (err) {
             console.error('Error fetching users:', err);
@@ -262,9 +269,20 @@ const AdminAbsenStokModal: React.FC<AdminAbsenStokModalProps> = ({
                                                                 selectedUser?.id === user.id ? 'bg-[#B09331]/20' : ''
                                                             }`}
                                                         >
-                                                            <User className="w-4 h-4 text-[#888]" />
+                                                            <div className="flex items-center gap-1">
+                                                                {user.role === 'admin' ? (
+                                                                    <Shield className="w-4 h-4 text-[#B09331]" />
+                                                                ) : (
+                                                                    <User className="w-4 h-4 text-[#888]" />
+                                                                )}
+                                                            </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <p className="text-white text-sm truncate">{user.nama_lengkap}</p>
+                                                                <div className="flex items-center gap-2">
+                                                                    <p className="text-white text-sm truncate">{user.nama_lengkap}</p>
+                                                                    {user.role === 'admin' && (
+                                                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#B09331]/20 text-[#B09331] font-medium">Admin</span>
+                                                                    )}
+                                                                </div>
                                                                 <p className="text-[#888] text-xs">@{user.username}</p>
                                                             </div>
                                                             {selectedUser?.id === user.id && (
