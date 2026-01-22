@@ -14,7 +14,9 @@ import {
     Package,
     Calendar,
     BoxIcon,
-    UserPlus
+    UserPlus,
+    Trash2,
+    AlertCircle
 } from "lucide-react";
 import { stokService } from "../../../services/barang.service";
 import type { StokHarian } from "../../../types/barang.types";
@@ -48,6 +50,9 @@ const HistoriStokDetailPage: React.FC = () => {
     const [selectedUser, setSelectedUser] = useState<UserTransaction | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [showAbsenModal, setShowAbsenModal] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
 
     // Check if stok is for today
     const isToday = useMemo(() => {
@@ -98,6 +103,28 @@ const HistoriStokDetailPage: React.FC = () => {
             return 'SUDAH_SETOR';
         }
         return 'BELUM_SETOR';
+    };
+
+    // Handle delete stock
+    const handleDelete = async () => {
+        if (!stok) return;
+        
+        setDeleting(true);
+        setDeleteError(null);
+
+        try {
+            const response = await stokService.deleteStok(stok.id);
+            if (response.success) {
+                // Navigate back to history page after successful deletion
+                navigate('/admin/histori-stok');
+            } else {
+                setDeleteError(response.message || 'Gagal menghapus stok');
+            }
+        } catch (err: any) {
+            setDeleteError(err.message || 'Terjadi kesalahan');
+        } finally {
+            setDeleting(false);
+        }
     };
 
     // Filter users
@@ -225,16 +252,28 @@ const HistoriStokDetailPage: React.FC = () => {
                             <p className="text-[#888] text-sm">Detail Stok {stok.barang?.nama} Tanggal {formatTanggal(stok.tanggalEdar)}</p>
                         </div>
                     </div>
-                    {/* Tambah Absen Button - Only show for today */}
-                    {isToday && (
-                        <button
-                            onClick={() => setShowAbsenModal(true)}
-                            className="flex items-center gap-2 bg-[#B09331] hover:bg-[#C4A73B] text-white px-4 py-2 rounded-xl transition-colors text-sm font-medium"
-                        >
-                            <UserPlus className="w-4 h-4" />
-                            Tambah Absen
-                        </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {/* Delete Button - Only show if stock has never been taken */}
+                        {(!stok.users || stok.users.length === 0) && (
+                            <button
+                                onClick={() => setShowDeleteConfirm(true)}
+                                className="flex items-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-3 py-2 rounded-xl transition-colors text-sm font-medium"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                <span className="hidden sm:inline">Hapus</span>
+                            </button>
+                        )}
+                        {/* Tambah Absen Button - Only show for today */}
+                        {isToday && (
+                            <button
+                                onClick={() => setShowAbsenModal(true)}
+                                className="flex items-center gap-2 bg-[#B09331] hover:bg-[#C4A73B] text-white px-4 py-2 rounded-xl transition-colors text-sm font-medium"
+                            >
+                                <UserPlus className="w-4 h-4" />
+                                <span className="hidden sm:inline">Tambah Absen</span>
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Stok Info Card */}
@@ -466,6 +505,109 @@ const HistoriStokDetailPage: React.FC = () => {
                     }}
                     stok={stok}
                 />
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && stok && (
+                <div 
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] flex items-center justify-center p-4"
+                    onClick={() => {
+                        if (!deleting) {
+                            setShowDeleteConfirm(false);
+                            setDeleteError(null);
+                        }
+                    }}
+                >
+                    <div 
+                        className="bg-[#1e1e1e] w-full max-w-md rounded-2xl overflow-hidden shadow-xl border border-[#333]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="bg-red-600/10 border-b border-red-600/30 p-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-full bg-red-600/20 flex items-center justify-center">
+                                    <Trash2 className="w-6 h-6 text-red-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-white font-bold text-lg">Hapus Stok</h3>
+                                    <p className="text-red-400 text-sm">Tindakan ini tidak dapat dibatalkan</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-4 space-y-4">
+                            <div className="bg-[#252525] rounded-xl p-4">
+                                <p className="text-white font-medium mb-2">Detail Stok:</p>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-[#888]">Barang:</span>
+                                        <span className="text-white font-medium">{stok.barang?.nama}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-[#888]">Tanggal:</span>
+                                        <span className="text-white">{formatTanggal(stok.tanggalEdar)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-[#888]">Stok:</span>
+                                        <span className="text-white">{stok.stok} pcs</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <CheckCircle className="w-5 h-5 text-green-400" />
+                                    <span className="text-green-400 font-medium">Modal Dikembalikan</span>
+                                </div>
+                                <p className="text-green-400 text-2xl font-bold">
+                                    Rp {formatRupiah(stok.modal)}
+                                </p>
+                                <p className="text-green-400/70 text-xs mt-1">
+                                    Modal akan dikembalikan ke saldo
+                                </p>
+                            </div>
+
+                            {deleteError && (
+                                <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 text-sm">
+                                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                                    <span>{deleteError}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="p-4 border-t border-[#333] flex gap-3">
+                            <button 
+                                onClick={() => {
+                                    setShowDeleteConfirm(false);
+                                    setDeleteError(null);
+                                }}
+                                disabled={deleting}
+                                className="flex-1 bg-[#333] text-white font-semibold py-3 rounded-xl hover:bg-[#444] transition-colors disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button 
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {deleting ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Menghapus...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 className="w-5 h-5" />
+                                        Ya, Hapus
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
