@@ -457,19 +457,19 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                                                                 <Package className="w-5 h-5 text-[#888]" />
                                                             )}
                                                         </div>
-                                                        <div className="flex-1">
-                                                            <div className="flex justify-between items-start">
-                                                                <p className="text-white font-medium">{item.stokHarian.barang.nama}</p>
-                                                                {/* Show Date if in pending mode */}
-                                                                {viewMode === 'pending' && (
-                                                                    <span className="text-xs text-[#888] bg-[#333] px-1.5 py-0.5 rounded">
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-white font-medium truncate pr-2">{item.stokHarian.barang.nama}</p>
+                                                            <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                                                                 {/* Show Date if in pending mode */}
+                                                                 {viewMode === 'pending' && (
+                                                                    <span className="text-[10px] text-[#B09331] bg-[#B09331]/10 px-1.5 py-0.5 rounded border border-[#B09331]/20">
                                                                         {formatDate(item.tanggalAmbil)}
                                                                     </span>
                                                                 )}
+                                                                <p className="text-[#888] text-sm">
+                                                                    Max: {item.qty} item
+                                                                </p>
                                                             </div>
-                                                            <p className="text-[#888] text-sm">
-                                                                Max: {item.qty} item
-                                                            </p>
                                                         </div>
                                                         <div className="text-right flex items-center gap-2">
                                                             <p className="text-[#B09331] font-bold">
