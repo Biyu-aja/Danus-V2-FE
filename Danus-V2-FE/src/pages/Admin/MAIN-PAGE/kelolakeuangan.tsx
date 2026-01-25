@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
-import Header from "../../components/general/header";
-import Navbar from "../../components/admin/general-admin/navbar";
-import TambahTransaksiModal from "../../components/admin/kelola-keuangan/tambah-transaksi-modal";
-import ExportModal from "../../components/admin/kelola-keuangan/export-modal";
-import KeuanganDetailModal from "../../components/admin/kelola-keuangan/keuangan-detail-modal";
-import { keuanganService } from "../../services/keuangan.service";
-import type { DetailKeuangan, Saldo } from "../../types/keuangan.types";
+import Header from "../../../components/general/header";
+import Navbar from "../../../components/admin/general-admin/navbar";
+import TambahTransaksiModal from "../../../components/admin/kelola-keuangan/tambah-transaksi-modal";
+import ExportModal from "../../../components/admin/kelola-keuangan/export-modal";
+import KeuanganDetailModal from "../../../components/admin/kelola-keuangan/keuangan-detail-modal";
+import { keuanganService } from "../../../services/keuangan.service";
+import type { DetailKeuangan, Saldo } from "../../../types/keuangan.types";
 import { 
     Loader2, 
     Plus, 
