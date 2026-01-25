@@ -36,7 +36,7 @@ export interface AmbilBarang {
     id: number;
     userId: number;
     setorKepadaId: number | null;
-    status: 'BELUM_SETOR' | 'SUDAH_SETOR';
+    status: 'BELUM_SETOR' | 'SUDAH_SETOR' | 'SEBAGIAN_SETOR';
     keterangan?: string;
     tanggalAmbil: string;
     user: {

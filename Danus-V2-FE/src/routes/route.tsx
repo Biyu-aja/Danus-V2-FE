@@ -17,6 +17,8 @@ import ProfilPage from "../pages/User/profil";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { commonListed, adminListed, userListed } from "./listed";
 
+import KelolaRequest from "../pages/Admin/MAIN-PAGE/kelola-request";
+
 // Admin child routes - menggunakan adminListed untuk path
 const adminChildRoutes = [
     { index: true, element: <Dashboard /> },
@@ -30,6 +32,7 @@ const adminChildRoutes = [
     { path: adminListed.kelolaKeuangan, element: <KelolaKeuangan /> },
     { path: adminListed.historiStok, element: <HistoriStokPage /> },
     { path: adminListed.detailStok, element: <HistoriStokDetailPage /> },
+    { path: adminListed.requestSetor, element: <KelolaRequest /> },
     { path: adminListed.profil, element: <AdminProfilPage /> },
 ];
 
