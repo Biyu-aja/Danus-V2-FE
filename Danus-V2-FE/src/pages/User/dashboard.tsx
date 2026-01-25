@@ -3,7 +3,9 @@ import Header from "../../components/general/header";
 import UserNavbar from "../../components/user/navbar";
 import StokCardUser from "../../components/user/stok-card-user";
 import AmbilStokModal from "../../components/user/ambil-stok-modal";
-import { Loader2, Package, ShoppingBag, Wallet, AlertCircle } from "lucide-react";
+import RequestSetorModal from "../../components/modals/request-setor-modal";
+import RequestListModal from "../../components/modals/request-list-modal";
+import { Loader2, Package, ShoppingBag, Wallet, AlertCircle, Check, X, Clock } from "lucide-react";
 import { stokService } from "../../services/barang.service";
 import { ambilBarangService, type AmbilBarang } from "../../services/ambilBarang.service";
 import { authService } from "../../services/auth.service";
@@ -16,6 +18,8 @@ const UserDashboard: React.FC = () => {
     const [loadingAmbil, setLoadingAmbil] = useState(true);
     const [selectedStok, setSelectedStok] = useState<StokHarian | null>(null);
     const [showModal, setShowModal] = useState(false);
+    const [showRequestModal, setShowRequestModal] = useState(false);
+    const [showRequestListModal, setShowRequestListModal] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -49,8 +53,10 @@ const UserDashboard: React.FC = () => {
             try {
                 const response = await ambilBarangService.getAmbilBarangByUserId(currentUser.id);
                 if (response.success && response.data) {
-                    // Filter hanya yang belum setor
-                    const belumSetor = response.data.filter(item => item.status === 'BELUM_SETOR');
+                    // Filter yang belum setor atau sebagian setor (masih ada tanggungan)
+                    const belumSetor = response.data.filter(item => 
+                        item.status === 'BELUM_SETOR' || item.status === 'SEBAGIAN_SETOR'
+                    );
                     setMyAmbilBarang(belumSetor);
                 }
             } catch (err) {
@@ -64,11 +70,15 @@ const UserDashboard: React.FC = () => {
 
     // Calculate summary
     const totalItemDiambil = myAmbilBarang.reduce((acc, item) => {
-        return acc + item.detailSetor.reduce((sum, detail) => sum + detail.qty, 0);
+        return acc + item.detailSetor
+            .filter(d => d.tanggalSetor === null) // Only count unpaid details
+            .reduce((sum, detail) => sum + detail.qty, 0);
     }, 0);
 
     const totalHarusSetor = myAmbilBarang.reduce((acc, item) => {
-        return acc + item.detailSetor.reduce((sum, detail) => sum + detail.totalHarga, 0);
+        return acc + item.detailSetor
+            .filter(d => d.tanggalSetor === null) // Only count unpaid details
+            .reduce((sum, detail) => sum + detail.totalHarga, 0);
     }, 0);
 
     const formatRupiah = (num: number) => {
@@ -111,7 +121,10 @@ const UserDashboard: React.FC = () => {
                 
                 const ambilResponse = await ambilBarangService.getAmbilBarangByUserId(currentUser.id);
                 if (ambilResponse.success && ambilResponse.data) {
-                    const belumSetor = ambilResponse.data.filter(item => item.status === 'BELUM_SETOR');
+                    // Filter yang belum setor atau sebagian setor
+                    const belumSetor = ambilResponse.data.filter(item => 
+                        item.status === 'BELUM_SETOR' || item.status === 'SEBAGIAN_SETOR'
+                    );
                     setMyAmbilBarang(belumSetor);
                 }
 
@@ -228,10 +241,28 @@ const UserDashboard: React.FC = () => {
                 {/* My Current Holdings Section */}
                 {!loadingAmbil && myAmbilBarang.length > 0 && (
                     <div className="mt-4">
-                        <h2 className="text-white font-bold text-base flex items-center gap-2 mb-3">
-                            <Package className="w-5 h-5 text-blue-400" />
-                            Barang yang Kamu Bawa
-                        </h2>
+                        <div className="flex justify-between items-center mb-3">
+                            <h2 className="text-white font-bold text-base flex items-center gap-2">
+                                <Package className="w-5 h-5 text-blue-400" />
+                                Barang yang Kamu Bawa
+                            </h2>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => setShowRequestListModal(true)}
+                                    className="text-xs bg-[#333] text-[#888] px-3 py-1.5 rounded-lg border border-[#444] hover:bg-[#444] hover:text-white transition-colors flex items-center gap-1.5 font-medium"
+                                >
+                                    <Clock className="w-3.5 h-3.5" />
+                                </button>
+                                <button 
+                                    onClick={() => setShowRequestModal(true)}
+                                    className="text-xs bg-[#B09331]/20 text-[#B09331] px-3 py-1.5 rounded-lg border border-[#B09331]/30 hover:bg-[#B09331]/30 transition-colors flex items-center gap-1.5 font-medium"
+                                >
+                                    <Wallet className="w-3.5 h-3.5" />
+                                    Request Setor
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="bg-[#1e1e1e] rounded-xl border border-[#333] overflow-hidden">
                             {myAmbilBarang.map((ambil) => (
                                 <div key={ambil.id} className="border-b border-[#333] last:border-b-0">
@@ -245,13 +276,19 @@ const UserDashboard: React.FC = () => {
                                                     minute: '2-digit'
                                                 })}
                                             </span>
-                                            <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">
-                                                Belum Setor
+                                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                                ambil.status === 'SEBAGIAN_SETOR' 
+                                                ? 'bg-blue-500/20 text-blue-400' 
+                                                : 'bg-yellow-500/20 text-yellow-400'
+                                            }`}>
+                                                {ambil.status === 'SEBAGIAN_SETOR' ? 'Sebagian Setor' : 'Belum Setor'}
                                             </span>
                                         </div>
                                     </div>
                                     {ambil.detailSetor.map((detail) => (
-                                        <div key={detail.id} className="flex items-center gap-3 p-3">
+                                        <div key={detail.id} className={`flex items-center gap-3 p-3 ${
+                                            detail.tanggalSetor ? 'opacity-50 grayscale' : ''
+                                        }`}>
                                             <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#333] flex-shrink-0">
                                                 {detail.stokHarian.barang.gambar ? (
                                                     <img 
@@ -295,6 +332,27 @@ const UserDashboard: React.FC = () => {
                 onSubmit={handleSubmitAmbil}
                 isLoading={isSubmitting}
             />
+
+            {/* Request Setor Modal */}
+            {currentUser && (
+                <>
+                    <RequestSetorModal
+                        isOpen={showRequestModal}
+                        onClose={() => setShowRequestModal(false)}
+                        myAmbilBarang={myAmbilBarang}
+                        userId={currentUser.id}
+                        onSuccess={() => {
+                            setSuccessMessage("Permintaan setor berhasil dikirim!");
+                            setTimeout(() => setSuccessMessage(null), 3000);
+                        }}
+                    />
+                    <RequestListModal
+                        isOpen={showRequestListModal}
+                        onClose={() => setShowRequestListModal(false)}
+                        userId={currentUser.id}
+                    />
+                </>
+            )}
 
             <UserNavbar />
         </div>
