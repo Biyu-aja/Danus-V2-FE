@@ -14,6 +14,7 @@ interface UserStatusCardProps {
     selectedBarangIds?: number[];
     onSuccess?: () => void;
     date?: Date;
+    viewMode?: 'daily' | 'pending'; // Add viewMode prop
 }
 
 // Status Badge Component
@@ -50,7 +51,8 @@ const UserStatusCard: React.FC<UserStatusCardProps> = ({
     user, 
     selectedBarangIds = [],
     onSuccess,
-    date
+    date,
+    viewMode // Destructure viewMode
 }) => {
     const [showModal, setShowModal] = useState(false);
 
@@ -63,8 +65,6 @@ const UserStatusCard: React.FC<UserStatusCardProps> = ({
     const handleWhatsAppClick = (e: React.MouseEvent) => {
         e.stopPropagation();
     };
-
-    // Format phone number for WhatsApp
 
     return (
         <>
@@ -157,6 +157,7 @@ const UserStatusCard: React.FC<UserStatusCardProps> = ({
                 userId={user.id}
                 userName={user.nama_lengkap}
                 date={date}
+                viewMode={viewMode} // Pass viewMode
             />
         </>
     );

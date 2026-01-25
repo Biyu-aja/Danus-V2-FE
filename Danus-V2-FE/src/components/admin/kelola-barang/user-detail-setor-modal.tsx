@@ -36,6 +36,7 @@ interface UserDetailSetorModalProps {
     userId: number;
     userName: string;
     date?: Date; // Optional date property
+    viewMode?: 'daily' | 'pending'; // Add viewMode prop
 }
 
 interface SelectedItemSetor {
@@ -50,7 +51,8 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
     onSuccess,
     userId,
     userName,
-    date
+    date,
+    viewMode = 'daily' // Default to daily
 }) => {
     const navigate = useNavigate();
     const [ambilBarangList, setAmbilBarangList] = useState<AmbilBarang[]>([]);
@@ -78,7 +80,7 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
     // Admin ambil barang modal state
     const [showAdminAmbilModal, setShowAdminAmbilModal] = useState(false);
 
-    // Check if viewing today's data
+    // Check if viewing today's data (only relevant for daily mode)
     const isToday = useMemo(() => {
         if (!date) return true; // No date means today
         const today = new Date();
@@ -99,7 +101,7 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
             setNote("");
             setOriginalNote("");
         }
-    }, [isOpen, userId, date]); // Add date to dependency
+    }, [isOpen, userId, date, viewMode]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -113,23 +115,33 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
             // Fetch user's ambil barang
             const response = await ambilBarangService.getAmbilBarangByUserId(userId);
             if (response.success && response.data) {
-                // Use provided date or default to Today
-                const targetDate = date ? new Date(date) : new Date();
-                targetDate.setHours(0, 0, 0, 0);
+                let filteredData = response.data;
 
-                const filteredData = response.data.filter(ab => {
-                    const ambilDate = new Date(ab.tanggalAmbil);
-                    ambilDate.setHours(0, 0, 0, 0);
-                    return ambilDate.getTime() === targetDate.getTime();
-                });
-                setAmbilBarangList(filteredData);
-                
-                // Load existing keterangan from first AmbilBarang
-                if (filteredData.length > 0 && filteredData[0].keterangan) {
-                    setNote(filteredData[0].keterangan);
-                    setOriginalNote(filteredData[0].keterangan);
-                    setShowNoteInput(true);
+                if (viewMode === 'daily') {
+                    // Use provided date or default to Today
+                    const targetDate = date ? new Date(date) : new Date();
+                    targetDate.setHours(0, 0, 0, 0);
+
+                    filteredData = response.data.filter(ab => {
+                        const ambilDate = new Date(ab.tanggalAmbil);
+                        ambilDate.setHours(0, 0, 0, 0);
+                        return ambilDate.getTime() === targetDate.getTime();
+                    });
+
+                    // Load existing keterangan from first AmbilBarang (only for daily mode)
+                    if (filteredData.length > 0 && filteredData[0].keterangan) {
+                        setNote(filteredData[0].keterangan);
+                        setOriginalNote(filteredData[0].keterangan);
+                        setShowNoteInput(true);
+                    }
+                } else if (viewMode === 'pending') {
+                    // For pending mode, we want ALL transactions that have pending items
+                    filteredData = response.data.filter(ab => 
+                        ab.detailSetor.some(detail => !detail.tanggalSetor)
+                    );
                 }
+
+                setAmbilBarangList(filteredData);
             }
 
             // Fetch admins for dropdown
@@ -155,21 +167,37 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
         return new Intl.NumberFormat('id-ID').format(num);
     };
 
+    // Format date for display
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    };
+
     // Get all detail setor items that are NOT yet deposited
     const pendingItems = useMemo(() => {
-        const items: (DetailSetor & { ambilBarangId: number })[] = [];
+        const items: (DetailSetor & { ambilBarangId: number; tanggalAmbil: string })[] = [];
         ambilBarangList.forEach(ab => {
             ab.detailSetor.forEach(detail => {
                 if (!detail.tanggalSetor) {
-                    items.push({ ...detail, ambilBarangId: ab.id });
+                    items.push({ 
+                        ...detail, 
+                        ambilBarangId: ab.id,
+                        tanggalAmbil: ab.tanggalAmbil
+                    });
                 }
             });
         });
         return items;
     }, [ambilBarangList]);
 
-    // Get all deposited items
+    // Get all deposited items (Only relevant for daily mode usually, or we show none/all)
     const depositedItems = useMemo(() => {
+        // If in pending mode, we might not want to show deposited items to avoid clutter,
+        // OR we show them if they are part of the 'AmbilBarang' structure we fetched.
+        // Let's stick to showing what's in ambilBarangList.
         const items: (DetailSetor & { ambilBarangId: number })[] = [];
         ambilBarangList.forEach(ab => {
             ab.detailSetor.forEach(detail => {
@@ -331,7 +359,12 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                             <h2 className="text-white font-medium truncate">{userData?.nama_lengkap}</h2>
                             <div className="flex items-center gap-1 text-[#888] text-xs">
                                 <CalendarIcon className="w-3 h-3" />
-                                <span>{date ? date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Hari Ini'}</span>
+                                <span>
+                                    {viewMode === 'pending' 
+                                        ? 'Semua Belum Setor' 
+                                        : (date ? date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Hari Ini')
+                                    }
+                                </span>
                             </div>
                         </div>
                         <ChevronRight className="w-5 h-5 text-[#666] group-hover:text-[#B09331] transition-colors" />
@@ -352,7 +385,7 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                     ) : ambilBarangList.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-40 text-[#888]">
                             <Package className="w-12 h-12 mb-2 opacity-50" />
-                            <p>Belum ada pengambilan hari ini</p>
+                            <p>Belum ada pengambilan {viewMode === 'daily' ? 'hari ini' : 'yang belum disetor'}</p>
                         </div>
                     ) : (
                         <>
@@ -425,7 +458,15 @@ const UserDetailSetorModal: React.FC<UserDetailSetorModalProps> = ({
                                                             )}
                                                         </div>
                                                         <div className="flex-1">
-                                                            <p className="text-white font-medium">{item.stokHarian.barang.nama}</p>
+                                                            <div className="flex justify-between items-start">
+                                                                <p className="text-white font-medium">{item.stokHarian.barang.nama}</p>
+                                                                {/* Show Date if in pending mode */}
+                                                                {viewMode === 'pending' && (
+                                                                    <span className="text-xs text-[#888] bg-[#333] px-1.5 py-0.5 rounded">
+                                                                        {formatDate(item.tanggalAmbil)}
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                             <p className="text-[#888] text-sm">
                                                                 Max: {item.qty} item
                                                             </p>
