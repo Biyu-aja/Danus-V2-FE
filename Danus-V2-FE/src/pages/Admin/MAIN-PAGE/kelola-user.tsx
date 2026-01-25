@@ -431,6 +431,7 @@ const KelolaUser: React.FC = () => {
                                             user={user}
                                             selectedBarangIds={selectedBarangIds}
                                             onSuccess={refreshData}
+                                            viewMode={viewMode === 'pending' ? 'pending' : 'daily'}
                                         />
                                     ))}
                                 </div>
