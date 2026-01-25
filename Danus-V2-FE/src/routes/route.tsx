@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import Auth from "../pages/General/auth";
 import Dashboard from "../pages/Admin/MAIN-PAGE/dashboard";
-import KelolaKeuangan from "../pages/Admin/kelolakeuangan";
+import KelolaKeuangan from "../pages/Admin/MAIN-PAGE/kelolakeuangan";
 import KelolaUser from "../pages/Admin/MAIN-PAGE/kelola-user";
 import KelolaBarang from "../pages/Admin/MAIN-PAGE/kelola-barang";
 import TambahBarangPage from "../pages/Admin/Kelola-Barang-Page/tambah-barang";

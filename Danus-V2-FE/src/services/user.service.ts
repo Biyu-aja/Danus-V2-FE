@@ -117,6 +117,41 @@ export const userService = {
     },
 
     /**
+     * Get users with pending deposits
+     */
+    async getUsersWithPendingDeposits(): Promise<ApiResponse<UserWithStatus[]>> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/pending-deposits`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: data.message || 'Gagal mendapatkan data user belum setor',
+                };
+            }
+
+            return {
+                success: true,
+                message: data.message || 'Berhasil mendapatkan data user belum setor',
+                data: data.data,
+            };
+        } catch (error) {
+            console.error('Get users pending error:', error);
+            return {
+                success: false,
+                message: 'Terjadi kesalahan jaringan',
+            };
+        }
+    },
+
+    /**
      * Get user by ID
      */
     async getUserById(id: number): Promise<ApiResponse<User>> {

@@ -20,7 +20,7 @@ import { useDebounce } from "../../../hooks/useDebounce";
 import type { StokHarian } from "../../../types/barang.types";
 
 type StatusFilter = 'SEMUA' | 'SUDAH_SETOR' | 'BELUM_SETOR' | 'BELUM_AMBIL';
-type ViewMode = 'today' | 'history';
+type ViewMode = 'today' | 'history' | 'pending';
 
 const KelolaUser: React.FC = () => {
     const navigate = useNavigate();
@@ -50,17 +50,28 @@ const KelolaUser: React.FC = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Fetch both API calls in parallel
-                const [usersResponse, stokResponse] = await Promise.all([
-                    userService.getUsersWithTodayStatus(),
-                    stokService.getStokHariIni()
-                ]);
-                
-                if (usersResponse.success && usersResponse.data) {
-                    setUsers(usersResponse.data);
-                }
-                if (stokResponse.success && stokResponse.data) {
-                    setStokHariIni(stokResponse.data);
+                if (viewMode === 'today') {
+                    // Fetch both API calls in parallel
+                    const [usersResponse, stokResponse] = await Promise.all([
+                        userService.getUsersWithTodayStatus(),
+                        stokService.getStokHariIni()
+                    ]);
+                    
+                    if (usersResponse.success && usersResponse.data) {
+                        setUsers(usersResponse.data);
+                    }
+                    if (stokResponse.success && stokResponse.data) {
+                        setStokHariIni(stokResponse.data);
+                    }
+                } else if (viewMode === 'pending') {
+                     const usersResponse = await userService.getUsersWithPendingDeposits();
+                     if (usersResponse.success && usersResponse.data) {
+                        setUsers(usersResponse.data);
+                     } else {
+                        setUsers([]);
+                     }
+                     // Reset stok data as it's not relevant for pending view in the same way
+                     setStokHariIni([]);
                 }
             } catch (err) {
                 console.error('Error fetching data:', err);
@@ -69,7 +80,7 @@ const KelolaUser: React.FC = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [viewMode]);
 
     // Fetch history when switching to history mode
     useEffect(() => {
@@ -95,16 +106,23 @@ const KelolaUser: React.FC = () => {
     // Refresh data function - OPTIMIZED with Promise.all
     const refreshData = async () => {
         try {
-            const [usersResponse, stokResponse] = await Promise.all([
-                userService.getUsersWithTodayStatus(),
-                stokService.getStokHariIni()
-            ]);
-            
-            if (usersResponse.success && usersResponse.data) {
-                setUsers(usersResponse.data);
-            }
-            if (stokResponse.success && stokResponse.data) {
-                setStokHariIni(stokResponse.data);
+            if (viewMode === 'today') {
+                const [usersResponse, stokResponse] = await Promise.all([
+                    userService.getUsersWithTodayStatus(),
+                    stokService.getStokHariIni()
+                ]);
+                
+                if (usersResponse.success && usersResponse.data) {
+                    setUsers(usersResponse.data);
+                }
+                if (stokResponse.success && stokResponse.data) {
+                    setStokHariIni(stokResponse.data);
+                }
+            } else if (viewMode === 'pending') {
+                 const usersResponse = await userService.getUsersWithPendingDeposits();
+                 if (usersResponse.success && usersResponse.data) {
+                    setUsers(usersResponse.data);
+                 }
             }
         } catch (err) {
             console.error('Error refreshing data:', err);
@@ -137,16 +155,29 @@ const KelolaUser: React.FC = () => {
         return groups;
     }, [historiStok]);
 
-    // Get barang list from stok hari ini
+    // Get barang list from stok hari ini OR from users in pending mode
     const availableBarangList = useMemo(() => {
-        return stokHariIni
-            .filter(stok => stok.barang)
-            .map(stok => ({
-                barangId: stok.barang!.id,
-                nama: stok.barang!.nama,
-            }))
+        // Collect all barang from current user list (works for both today and pending)
+        const allBarang = new Map<number, string>();
+        
+        if (viewMode === 'today') {
+             stokHariIni.forEach(stok => {
+                if (stok.barang) {
+                    allBarang.set(stok.barang.id, stok.barang.nama);
+                }
+            });
+        } else if (viewMode === 'pending') {
+            users.forEach(user => {
+                user.barangList?.forEach(b => {
+                    allBarang.set(b.barangId, b.nama);
+                });
+            });
+        }
+       
+       return Array.from(allBarang.entries())
+            .map(([id, nama]) => ({ barangId: id, nama }))
             .sort((a, b) => a.nama.localeCompare(b.nama));
-    }, [stokHariIni]);
+    }, [stokHariIni, users, viewMode]);
 
     // Toggle barang filter
     const toggleBarangFilter = (barangId: number) => {
@@ -175,7 +206,7 @@ const KelolaUser: React.FC = () => {
             );
         }
 
-        if (statusFilter !== 'SEMUA') {
+        if (statusFilter !== 'SEMUA' && viewMode !== 'pending') {
             result = result.filter(user => user.status === statusFilter);
         }
 
@@ -194,7 +225,7 @@ const KelolaUser: React.FC = () => {
         result.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 
         return result;
-    }, [users, debouncedSearchQuery, statusFilter, selectedBarangIds]);
+    }, [users, debouncedSearchQuery, statusFilter, selectedBarangIds, viewMode]);
 
     // Count by status
     const statusCounts = useMemo(() => {
@@ -240,48 +271,61 @@ const KelolaUser: React.FC = () => {
                 </div>
 
                 {/* View Mode Tabs */}
-                <div className="flex bg-[#1e1e1e] rounded-xl p-1 gap-1">
+                <div className="flex bg-[#1e1e1e] rounded-xl p-1 gap-1 overflow-x-auto">
                     <button
                         onClick={() => setViewMode('today')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium transition-all ${
+                        className={`flex-1 min-w-fit flex items-center justify-center gap-2 px-2 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
                             viewMode === 'today'
                                 ? 'bg-[#B09331] text-white'
                                 : 'text-[#888] hover:text-white'
                         }`}
                     >
                         <Calendar className="w-4 h-4" />
-                        Hari Ini
+                        <span className="text-xs sm:text-sm">Hari Ini</span>
                     </button>
                     <button
+                        onClick={() => setViewMode('pending')}
+                        className={`flex-1 min-w-fit flex items-center justify-center gap-2 px-2 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
+                            viewMode === 'pending'
+                                ? 'bg-red-500/80 text-white'
+                                : 'text-[#888] hover:text-white'
+                        }`}
+                    >
+                        <Users className="w-4 h-4" />
+                        <span className="text-xs sm:text-sm">Belum Setor</span>
+                    </button>
+                     <button
                         onClick={() => setViewMode('history')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium transition-all ${
+                        className={`flex-1 min-w-fit flex items-center justify-center gap-2 px-2 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
                             viewMode === 'history'
                                 ? 'bg-[#B09331] text-white'
                                 : 'text-[#888] hover:text-white'
                         }`}
                     >
                         <History className="w-4 h-4" />
-                        Histori
+                        <span className="text-xs sm:text-sm">Histori</span>
                     </button>
                 </div>
 
-                {viewMode === 'today' ? (
+                {viewMode === 'today' || viewMode === 'pending' ? (
                     <>
-                        {/* Summary Cards */}
-                        <div className="grid grid-cols-3 gap-2">
-                            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
-                                <p className="text-green-400 text-2xl font-bold">{statusCounts.SUDAH_SETOR}</p>
-                                <p className="text-green-400/70 text-xs">Setor</p>
+                        {/* Summary Cards - Only show for 'today' view mode */}
+                        {viewMode === 'today' && (
+                             <div className="grid grid-cols-3 gap-2">
+                                <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
+                                    <p className="text-green-400 text-2xl font-bold">{statusCounts.SUDAH_SETOR}</p>
+                                    <p className="text-green-400/70 text-xs">Setor</p>
+                                </div>
+                                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 text-center">
+                                    <p className="text-yellow-400 text-2xl font-bold">{statusCounts.BELUM_SETOR}</p>
+                                    <p className="text-yellow-400/70 text-xs">Ambil</p>
+                                </div>
+                                <div className="bg-gray-500/10 border border-gray-500/30 rounded-xl p-3 text-center">
+                                    <p className="text-gray-400 text-2xl font-bold">{statusCounts.BELUM_AMBIL}</p>
+                                    <p className="text-gray-400/70 text-xs">Belum</p>
+                                </div>
                             </div>
-                            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 text-center">
-                                <p className="text-yellow-400 text-2xl font-bold">{statusCounts.BELUM_SETOR}</p>
-                                <p className="text-yellow-400/70 text-xs">Ambil</p>
-                            </div>
-                            <div className="bg-gray-500/10 border border-gray-500/30 rounded-xl p-3 text-center">
-                                <p className="text-gray-400 text-2xl font-bold">{statusCounts.BELUM_AMBIL}</p>
-                                <p className="text-gray-400/70 text-xs">Belum</p>
-                            </div>
-                        </div>
+                        )}
 
                         {/* Search Bar */}
                         <div className="relative">
@@ -296,30 +340,32 @@ const KelolaUser: React.FC = () => {
                         </div>
 
                         {/* Filter Tabs */}
-                        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
-                            {filterTabs.map((tab) => (
-                                <button
-                                    key={tab.key}
-                                    onClick={() => setStatusFilter(tab.key)}
-                                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                                        statusFilter === tab.key
-                                            ? 'bg-[#B09331] text-white'
-                                            : 'bg-[#1e1e1e] text-[#888] hover:text-white border border-[#333]'
-                                    }`}
-                                >
-                                    {tab.label}
-                                    {tab.count !== undefined && (
-                                        <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                        {viewMode === 'today' && (
+                             <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+                                {filterTabs.map((tab) => (
+                                    <button
+                                        key={tab.key}
+                                        onClick={() => setStatusFilter(tab.key)}
+                                        className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                                             statusFilter === tab.key
-                                                ? 'bg-white/20'
-                                                : 'bg-[#333]'
-                                        }`}>
-                                            {tab.count}
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
+                                                ? 'bg-[#B09331] text-white'
+                                                : 'bg-[#1e1e1e] text-[#888] hover:text-white border border-[#333]'
+                                        }`}
+                                    >
+                                        {tab.label}
+                                        {tab.count !== undefined && (
+                                            <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                                                statusFilter === tab.key
+                                                    ? 'bg-white/20'
+                                                    : 'bg-[#333]'
+                                            }`}>
+                                                {tab.count}
+                                            </span>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Barang Filter */}
                         {availableBarangList.length > 0 && (
